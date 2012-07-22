@@ -125,7 +125,7 @@
 		// that is not for this function to do; this function must NOT recursively
 		// call evaluateNullability() on any of its internals because that could easily
 		// result in a stack overflow.
-    // Just gets $nullable for each internal, if any.
+		// Just gets $nullable for each internal, if any.
 		// This has to be called after all strings have been resolved to parser references.
 		abstract public function evaluateNullability();
 
