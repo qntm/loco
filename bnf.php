@@ -11,7 +11,15 @@
 	$bnfGrammar = new Grammar(
 		"<syntax>",
 		array(
-			"<syntax>" => new GreedyMultiParser(
+			"<syntax>" => new ConcParser(
+				array(
+					"<rules>",
+					"OPT-WHITESPACE"
+				),
+				function($rules, $whitespace) { return $rules; }
+			),
+
+			"<rules>" => new GreedyMultiParser(
 				"<ruleoremptyline>",
 				1,
 				null,
@@ -31,7 +39,7 @@
 			),
 			
 			"<ruleoremptyline>" => new LazyAltParser(
-				array("<rule>", "<emptyline>", "TRAILING-SPACE")
+				array("<rule>", "<emptyline>")
 			),
 			
 			"<emptyline>" => new ConcParser(
@@ -39,11 +47,6 @@
 				function($whitespace, $eol) {
 					return null;
 				}
-			),
-			
-			"TRAILING-SPACE" => new RegexParser(
-				"#^[\t ]+#",
-				function($match) { return null; }
 			),
 			
 			"<rule>" => new ConcParser(
@@ -54,10 +57,17 @@
 					new StringParser("::="),
 					"OPT-WHITESPACE",
 					"<expression>",
-					"OPT-WHITESPACE",
 					"EOL"
 				),
-				function($whitespace1, $rule_name, $whitespace2, $equals, $whitespace3, $expression, $whitespace4, $eol) {
+				function(
+					$whitespace1,
+					$rule_name,
+					$whitespace2,
+					$equals,
+					$whitespace3,
+					$expression,
+					$eol
+				) {
 					return array(
 						"rule-name"  => $rule_name,
 						"expression" => $expression
@@ -129,7 +139,12 @@
 
 			"OPT-WHITESPACE" => new RegexParser("#^[\t ]*#"),
 
-			"EOL" => new StringParser("\n")
+			"EOL" => new LazyAltParser(
+				array(
+					new StringParser("\r"),
+					new StringParser("\n")
+				)
+			)
 		),
 		function($syntax) {
 			$parsers = array();
