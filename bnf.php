@@ -161,9 +161,9 @@
 			return new Grammar($top, $parsers);
 		}
 	);
-	
+
 	// if executing this file directly, run unit tests
-	if(__FILE__ !== $_SERVER["PHP_SELF"]) {
+	if(__FILE__ !== $_SERVER["SCRIPT_FILENAME"]) {
 		return;
 	}
 
