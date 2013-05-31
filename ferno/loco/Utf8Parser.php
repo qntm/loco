@@ -169,7 +169,7 @@ class Utf8Parser extends StaticParser
     public function __construct($blacklist = array(), $callback = null)
     {
         $this->blacklist = $blacklist;
-        $this->string = "new " . get_class() . "(" . serializeArray($blacklist) . ")";
+        $this->string = "new " . get_class() . "(" . $this->serializeArray($blacklist) . ")";
         parent::__construct($callback);
     }
 

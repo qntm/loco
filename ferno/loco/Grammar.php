@@ -19,7 +19,7 @@ class Grammar extends MonoParser
 
     public function __construct($S, $internals, $callback = null)
     {
-        $this->string = "new " . get_class() . "(" . var_export($S, true) . ", " . serializeArray($internals) . ")";
+        $this->string = "new " . get_class() . "(" . var_export($S, true) . ", " . $this->serializeArray($internals) . ")";
         parent::__construct($internals, $callback);
 
         if (! array_key_exists($S, $this->internals)) {

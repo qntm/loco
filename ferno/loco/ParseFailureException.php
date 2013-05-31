@@ -2,6 +2,7 @@
 
 namespace ferno\loco;
 
+use Exception;
 use RuntimeException;
 
 /**

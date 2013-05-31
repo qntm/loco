@@ -12,9 +12,11 @@ use ferno\loco\StringParser;
 
 require_once("Loco.php");
 
-// Takes a string presented in Backus-Naur Form and turns it into a new Grammar
-// object capable of recognising the language described by that string.
-// http://en.wikipedia.org/wiki/Backus%E2%80%93Naur_Form
+/**
+ * Takes a string presented in Backus-Naur Form and turns it into a new Grammar
+ * object capable of recognising the language described by that string.
+ * @link http://en.wikipedia.org/wiki/Backus%E2%80%93Naur_Form
+ */
 
 # This code is in the public domain.
 # http://qntm.org/locoparser

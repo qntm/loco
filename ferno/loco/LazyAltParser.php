@@ -19,7 +19,7 @@ class LazyAltParser extends MonoParser
             ) . " without at least one internal parser.\n");
         }
         $this->internals = $internals;
-        $this->string = "new " . get_class() . "(" . serializeArray($internals) . ")";
+        $this->string = "new " . get_class() . "(" . $this->serializeArray($internals) . ")";
         parent::__construct($internals, $callback);
     }
 

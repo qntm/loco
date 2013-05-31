@@ -10,7 +10,7 @@ class ConcParser extends MonoParser
 {
     public function __construct($internals, $callback = null)
     {
-        $this->string = "new " . get_class() . "(" . serializeArray($internals) . ")";
+        $this->string = "new " . get_class() . "(" . $this->serializeArray($internals) . ")";
         parent::__construct($internals, $callback);
     }
 

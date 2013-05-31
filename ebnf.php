@@ -12,12 +12,15 @@ use ferno\loco\StringParser;
 
 require_once("Loco.php");
 
-// Takes a string presented in Extended Backus-Naur Form and turns it into a new Grammar
-// object capable of recognising the language described by that string.
-// http://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_Form
-
-// Can't handle exceptions, since these are not context-free
-// Can't handle specials, which have no clear definition
+/**
+ * Takes a string presented in Extended Backus-Naur Form and turns it into a new Grammar
+ * object capable of recognising the language described by that string.
+ *
+ * @link http://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_Form
+ *
+ * Can't handle exceptions, since these are not context-free
+ * Can't handle specials, which have no clear definition
+ */
 
 # This code is in the public domain.
 # http://qntm.org/locoparser
@@ -220,7 +223,7 @@ $ebnfGrammar = new Grammar(
 
 // if executing this file directly, run unit tests
 if(__FILE__ !== $_SERVER["SCRIPT_FILENAME"]) {
-    #return;
+    return;
 }
 
 $string = "a = 'PROGRAM' ;";

@@ -11,7 +11,7 @@ use Exception;
  *
  * @link http://en.wikipedia.org/wiki/Parser_combinator
  */
-abstract class MonoParser
+abstract class MonoParser extends Parser
 {
     /**
      * A string form for any parser should be generated at instantiation time.

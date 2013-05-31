@@ -10,14 +10,18 @@ use ferno\loco\StringParser;
 
 require_once("Loco.php");
 
-# Left-recursion in Loco, demonstration.
+/**
+ * Left-recursion in Loco, demonstration.
+ *
+ * Left-recursive grammars cannot be parsed using a recursive descent approach.
+ * Loco detects left-recursion in a new grammar and raises an exception.
+ * How do we get around this?
+ */
 
-# Left-recursive grammars cannot be parsed using a recursive descent approach.
-# Loco detects left-recursion in a new grammar and raises an exception.
-# How do we get around this?
-
-# minus($minuend, $subtrahend) is a left-associative operator.
-# e.g. "5 - 4 - 3" means "(5 - 4) - 3 = -2", not "5 - (4 - 3) = 4".
+/**
+ * minus($minuend, $subtrahend) is a left-associative operator.
+ * e.g. "5 - 4 - 3" means "(5 - 4) - 3 = -2", not "5 - (4 - 3) = 4".
+ */
 function minus($minuend, $subtrahend) {
     return $minuend - $subtrahend;
 }
