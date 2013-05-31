@@ -1,8 +1,8 @@
 {
-	"name" : "ferno/loco",
-	"keywords" : ["parser", "parsing", "lexer"],
-	"homepage" : "http://qntm.org/loco",
-	"require" : {
-		"php" : ">=5.3.0"
-	}
+    "name" : "ferno/loco",
+    "keywords" : ["parser", "parsing", "lexer"],
+    "homepage" : "http://qntm.org/loco",
+    "require" : {
+        "php" : ">=5.3.0"
+    }
 }
