@@ -29,6 +29,12 @@ local.properties
 .buildpath
 
 
+############
+## PhpStorm
+############
+
+.idea
+
 #################
 ## Visual Studio
 #################

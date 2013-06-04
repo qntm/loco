@@ -1,75 +1,87 @@
 <?php
-	require_once("Loco.php");
 
-	# Left-recursion in Loco, demonstration.
+use ferno\loco\ConcParser;
+use ferno\loco\Grammar;
+use ferno\loco\GrammarException;
+use ferno\loco\GreedyStarParser;
+use ferno\loco\LazyAltParser;
+use ferno\loco\RegexParser;
+use ferno\loco\StringParser;
 
-	# Left-recursive grammars cannot be parsed using a recursive descent approach.
-	# Loco detects left-recursion in a new grammar and raises an exception.
-	# How do we get around this?
+require_once("Loco.php");
 
-	# minus($minuend, $subtrahend) is a left-associative operator.
-	# e.g. "5 - 4 - 3" means "(5 - 4) - 3 = -2", not "5 - (4 - 3) = 4".
-	function minus($minuend, $subtrahend) {
-		return $minuend - $subtrahend;
-	}
+/**
+ * Left-recursion in Loco, demonstration.
+ *
+ * Left-recursive grammars cannot be parsed using a recursive descent approach.
+ * Loco detects left-recursion in a new grammar and raises an exception.
+ * How do we get around this?
+ */
 
-	# N -> number
-	$N = new RegexParser(
-		"#^(0|[1-9][0-9]*)#",
-		function($match) { return (int) $match; }
-	);
-	
-	# P -> "-" N
-	$P = new ConcParser(
-		array(new StringParser("-"), $N),
-		function($minus, $n) { return $n; }
-	);
+/**
+ * minus($minuend, $subtrahend) is a left-associative operator.
+ * e.g. "5 - 4 - 3" means "(5 - 4) - 3 = -2", not "5 - (4 - 3) = 4".
+ */
+function minus($minuend, $subtrahend) {
+    return $minuend - $subtrahend;
+}
 
-	# Naive left-recursive grammar looks like this and raises an exception
-	# when instantiated.
-	try {
-		# S -> N
-		# S -> S P
-		$grammar = new Grammar(
-			"S",
-			array(
-				"S" => new LazyAltParser(
-					array(
-						"N",
-						new ConcParser(
-							array("S", "P"),
-							"minus"
-						)
-					)
-				),
-				"P" => $P,
-				"N" => $N
-			)
-		);
-		var_dump(false);
-	} catch (GrammarException $e) {
-		# Left-recursive in S
-		var_dump(true);
-	}
+# N -> number
+$N = new RegexParser(
+    "#^(0|[1-9][0-9]*)#",
+    function($match) { return (int) $match; }
+);
 
-	# Fix the grammar like so:
-	# S -> N P*
-	$grammar = new Grammar(
-		"S",
-		array(
-			"S" => new ConcParser(
-				array(
-					$N,
-					new GreedyStarParser("P")
-				),
-				function($n, $ps) {
-					return array_reduce($ps, "minus", $n); # clever bit
-				}
-			),
-			"P" => $P,
-			"N" => $N
-		)
-	);
+# P -> "-" N
+$P = new ConcParser(
+    array(new StringParser("-"), $N),
+    function($minus, $n) { return $n; }
+);
 
-	var_dump($grammar->parse("5-4-3") === -2); # true
-?>
+# Naive left-recursive grammar looks like this and raises an exception
+# when instantiated.
+try {
+    # S -> N
+    # S -> S P
+    $grammar = new Grammar(
+        "S",
+        array(
+            "S" => new LazyAltParser(
+                array(
+                    "N",
+                    new ConcParser(
+                        array("S", "P"),
+                        "minus"
+                    )
+                )
+            ),
+            "P" => $P,
+            "N" => $N
+        )
+    );
+    var_dump(false);
+} catch (GrammarException $e) {
+    # Left-recursive in S
+    var_dump(true);
+}
+
+# Fix the grammar like so:
+# S -> N P*
+$grammar = new Grammar(
+    "S",
+    array(
+        "S" => new ConcParser(
+            array(
+                $N,
+                new GreedyStarParser("P")
+            ),
+            function($n, $ps) {
+                return array_reduce($ps, "minus", $n); # clever bit
+            }
+        ),
+        "P" => $P,
+        "N" => $N
+    )
+);
+
+var_dump($grammar->parse("5-4-3") === -2); # true
