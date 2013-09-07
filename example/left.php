@@ -8,7 +8,7 @@ use ferno\loco\LazyAltParser;
 use ferno\loco\RegexParser;
 use ferno\loco\StringParser;
 
-require_once("Loco.php");
+require_once(__DIR__ . '/../vendor/autoload.php');
 
 /**
  * Left-recursion in Loco, demonstration.
@@ -84,4 +84,4 @@ $grammar = new Grammar(
     )
 );
 
-var_dump($grammar->parse("5-4-3") === -2); # true
+var_dump($grammar->parse("5-4-3"));

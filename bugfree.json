@@ -1,0 +1,15 @@
+{
+    "emitLevel": {
+        "unableToResolveType": "error",
+        "unableToResolveTypeInComment": "error",
+        "unableToResolveUse": "error",
+        "useOfUnqualifiedType": "warning",
+        "useOfUnqualifiedTypeInComment": "warning",
+        "duplicateAlias": "error",
+        "malformedUse": "error",
+        "multiStatementUse": "warning",
+        "missingNamespace": "error",
+        "unusedUse": "warning",
+        "disorganizedUses": "suppress"
+    }
+}

@@ -38,7 +38,7 @@ class ConcParser extends MonoParser
     /**
      * First-set is built up as follows...
      */
-    function firstSet()
+    public function firstSet()
     {
         $firstSet = array();
         foreach ($this->internals as $internal) {
