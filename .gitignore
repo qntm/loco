@@ -167,3 +167,7 @@ pip-log.txt
 
 # Mac crap
 .DS_Store
+
+# Composer installed dependencies
+vendor
+composer.lock
