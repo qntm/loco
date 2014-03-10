@@ -11,8 +11,11 @@ use RuntimeException;
  */
 class ParseFailureException extends RuntimeException
 {
+    public $i;
+
     public function __construct($message, $i, $string, $code =0, Exception $previous = null)
     {
+        $this->i = $i;
         $message .= " at position " . var_export($i, true) . " in string " . var_export($string, true);
         parent::__construct($message, $code);
     }
