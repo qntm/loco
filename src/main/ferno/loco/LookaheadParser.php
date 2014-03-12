@@ -13,10 +13,11 @@ class LookaheadParser extends StaticParser
 
     public function __construct($lookaheadStrings, $callback = null)
     {
-        if (! is_array($lookaheadStrings))
+        if (! is_array($lookaheadStrings)) {
             throw new GrammarException("\$lookaheadStrings must be an array");
-        else if (count($lookaheadStrings) == 0)
+        } else if (count($lookaheadStrings) == 0) {
             throw new GrammarException("\$lookaheadStrings must not be empty");
+        }
         $this->lookaheadStrings = $lookaheadStrings;
 
         $this->string = "new ".get_class()."(".$this->serializeArray($lookaheadStrings).")";
@@ -24,7 +25,9 @@ class LookaheadParser extends StaticParser
         parent::__construct($callback);
     }
 
-    // default callback: just return the string that was matched
+    /**
+     * default callback: return the string that was matched
+     */
     public function defaultCallback()
     {
         return func_get_arg(0);
@@ -33,20 +36,21 @@ class LookaheadParser extends StaticParser
     public function getResult($string, $i = 0)
     {
         $lookaheadFirstStringPos = strlen($string);
-        foreach ($this->lookaheadStrings as $lookahead)
-        {
+        foreach ($this->lookaheadStrings as $lookahead) {
             $pos = strpos($string, $lookahead, $i);
-            if ($pos !== FALSE AND $pos < $lookaheadFirstStringPos)
+            if ($pos !== FALSE AND $pos < $lookaheadFirstStringPos) {
                 $lookaheadFirstStringPos = $pos;
+            }
         }
 
-        if ($lookaheadFirstStringPos == $i)
+        if ($lookaheadFirstStringPos == $i) {
             throw new ParseFailureException($this." did not match anything ", $i, $string);
-        else
+        } else {
             return array(
                 "j" => $lookaheadFirstStringPos,
                 "args" => array(substr($string, $i, $lookaheadFirstStringPos - $i)),
             );
+        }
     }
 
     public function evaluateNullability()
