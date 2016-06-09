@@ -5,29 +5,34 @@ use Exception;
 
 // This occurs at Grammar instantiation time, e.g. left-recursion, null-stars,
 // miscellaneous housekeeping errors
-class GrammarException extends Exception { }
+class GrammarException extends Exception
+{
+}
 
 // Occurs when any parser fails to parse what it's supposed to
 // parse. Usually non-fatal and almost always caught
-class ParseFailureException extends Exception {
-    public function __construct($message, $i, $string, $code = 0, Exception $previous = null) {
-        $message .= " at position ".var_export($i, true)." in string ".var_export($string, true);
+class ParseFailureException extends Exception
+{
+    public function __construct($message, $i, $string, $code = 0, Exception $previous = null)
+    {
+        $message .= " at position " . var_export($i, true) . " in string " . var_export($string, true);
         parent::__construct($message, $code);
     }
 }
 
 // a helpful internal function
-function serialiseArray($array) {
+function serialiseArray($array)
+{
     $string = "array(";
-    foreach(array_keys($array) as $keyId => $key) {
-        $string .= var_export($key, true)." => ";
-        if(is_string($array[$key])) {
+    foreach (array_keys($array) as $keyId => $key) {
+        $string .= var_export($key, true) . " => ";
+        if (is_string($array[$key])) {
             $string .= var_export($array[$key], true);
         } else {
             $string .= $array[$key]->__toString();
         }
 
-        if($keyId + 1 !== count($array)) {
+        if ($keyId + 1 !== count($array)) {
             $string .= ", ";
         }
     }
@@ -39,7 +44,8 @@ function serialiseArray($array) {
 // These parsers are all unusual in that instead of returning a complete
 // set of js and tokens, each returns either a single successful combination of
 // j and result, or throws a ParseFailureException. These are, then, "monoparsers"
-abstract class MonoParser {
+abstract class MonoParser
+{
 
     // A string form for any parser should be generated at instantiation time.
     // This string should be *approximately* the "new MonoParser()" syntax,
@@ -47,7 +53,9 @@ abstract class MonoParser {
     // serialiseArray() helps with array arguments (var_export is no good because
     // it leaves line breaks!)
     protected $string;
-    public function __toString() {
+
+    public function __toString()
+    {
         return $this->string;
     }
 
@@ -65,29 +73,31 @@ abstract class MonoParser {
     // The arguments supplied to this callback depend on the parser class;
     // check!
     public $callback;
+
     abstract public function defaultCallback();
 
-    public function __construct($internals, $callback) {
-        if(!is_string($this->string)) {
+    public function __construct($internals, $callback)
+    {
+        if (!is_string($this->string)) {
             throw new Exception("You need to populate \$string");
         }
 
         // Perform basic validation.
-        if(!is_array($internals)) {
-            throw new GrammarException(var_export($internals, true)." should be an array");
+        if (!is_array($internals)) {
+            throw new GrammarException(var_export($internals, true) . " should be an array");
         }
-        foreach($internals as $internal) {
-            if(!is_string($internal) && !($internal instanceof MonoParser)) {
-                throw new GrammarException(var_export($internal, true)." should be either a string or a MonoParser");
+        foreach ($internals as $internal) {
+            if (!is_string($internal) && !($internal instanceof MonoParser)) {
+                throw new GrammarException(var_export($internal, true) . " should be either a string or a MonoParser");
             }
         }
         $this->internals = $internals;
 
         // if null, set default callback
-        if($callback === null) {
+        if ($callback === null) {
             $callback = array($this, "defaultCallback");
         }
-        if(!is_callable($callback)) {
+        if (!is_callable($callback)) {
             throw new GrammarException("Callback should be a callable function");
         }
         $this->callback = $callback;
@@ -98,7 +108,8 @@ abstract class MonoParser {
     abstract public function getResult($string, $i = 0);
 
     // apply callback to returned value before returning it
-    public function match($string, $i = 0) {
+    public function match($string, $i = 0)
+    {
         $result = $this->getResult($string, $i);
         return array(
             "j" => $result["j"],
@@ -109,9 +120,10 @@ abstract class MonoParser {
     // Parse: try to match this parser at the beginning of the string
     // Return the result only on success, or throw exception on failure
     // or if the match doesn't encompass the whole string
-    public function parse($string) {
+    public function parse($string)
+    {
         $result = $this->getResult($string, 0);
-        if($result["j"] != strlen($string)) {
+        if ($result["j"] != strlen($string)) {
             throw new ParseFailureException("Parsing completed prematurely", $result["j"], $string);
         }
 
@@ -143,14 +155,17 @@ abstract class MonoParser {
 }
 
 // Static parsers contain no internal parsers.
-abstract class StaticParser extends MonoParser {
+abstract class StaticParser extends MonoParser
+{
 
-    public function __construct($callback) {
+    public function __construct($callback)
+    {
         parent::__construct(array(), $callback);
     }
 
     // no internals => empty immediate first-set
-    public function firstSet() {
+    public function firstSet()
+    {
         return array();
     }
 
@@ -160,19 +175,23 @@ abstract class StaticParser extends MonoParser {
 }
 
 // Match the empty string
-class EmptyParser extends StaticParser {
-    public function __construct($callback = null) {
-        $this->string = "new ".get_class()."()";
+class EmptyParser extends StaticParser
+{
+    public function __construct($callback = null)
+    {
+        $this->string = "new " . get_class() . "()";
         parent::__construct($callback);
     }
 
     // default callback returns null
-    public function defaultCallback() {
+    public function defaultCallback()
+    {
         return null;
     }
 
     // Always match successfully, pass no args to callback
-    public function getResult($string, $i = 0) {
+    public function getResult($string, $i = 0)
+    {
         return array(
             "j" => $i,
             "args" => array()
@@ -180,41 +199,48 @@ class EmptyParser extends StaticParser {
     }
 
     // emptyparser is nullable.
-    public function evaluateNullability() {
+    public function evaluateNullability()
+    {
         return true;
     }
 }
 
 // Match a static string.
 // Callback should accept a single argument which is the static string in question.
-class StringParser extends StaticParser {
+class StringParser extends StaticParser
+{
     private $needle;
-    public function __construct($needle, $callback = null) {
-        if(!is_string($needle)) {
-            throw new GrammarException("Can't create a ".get_class()." with 'string' ".var_export($needle, true));
+
+    public function __construct($needle, $callback = null)
+    {
+        if (!is_string($needle)) {
+            throw new GrammarException("Can't create a " . get_class() . " with 'string' " . var_export($needle, true));
         }
         $this->needle = $needle;
-        $this->string = "new ".get_class()."(".var_export($needle, true).")";
+        $this->string = "new " . get_class() . "(" . var_export($needle, true) . ")";
         parent::__construct($callback);
     }
 
     // default callback: just return the string that was matched
-    public function defaultCallback() {
+    public function defaultCallback()
+    {
         return func_get_arg(0);
     }
 
-    public function getResult($string, $i = 0) {
-        if(strpos($string, $this->needle, $i) === $i) {
+    public function getResult($string, $i = 0)
+    {
+        if (strpos($string, $this->needle, $i) === $i) {
             return array(
                 "j" => $i + strlen($this->needle),
                 "args" => array($this->needle)
             );
         }
-        throw new ParseFailureException($this." could not find string ".var_export($this->needle, true), $i, $string);
+        throw new ParseFailureException($this . " could not find string " . var_export($this->needle, true), $i, $string);
     }
 
     // nullable only if string is ""
-    public function evaluateNullability() {
+    public function evaluateNullability()
+    {
         return ($this->needle === "");
     }
 
@@ -224,34 +250,40 @@ class StringParser extends StaticParser {
 // so use StringParser to match static strings where possible.
 // Regexes can match multiple times in theory, but this pattern returns a singleton
 // Callback should accept an array of all the matches made
-class RegexParser extends StaticParser {
+class RegexParser extends StaticParser
+{
     private $pattern;
-    public function __construct($pattern, $callback = null) {
-        $this->string = "new ".get_class()."(".var_export($pattern, true).")";
-        if(substr($pattern, 1, 1) !== "^") {
-            throw new GrammarException($this." doesn't anchor at the beginning of the string!");
+
+    public function __construct($pattern, $callback = null)
+    {
+        $this->string = "new " . get_class() . "(" . var_export($pattern, true) . ")";
+        if (substr($pattern, 1, 1) !== "^") {
+            throw new GrammarException($this . " doesn't anchor at the beginning of the string!");
         }
         $this->pattern = $pattern;
         parent::__construct($callback);
     }
 
     // default callback: return only the main match
-    public function defaultCallback() {
+    public function defaultCallback()
+    {
         return func_get_arg(0);
     }
 
-    public function getResult($string, $i = 0) {
-        if(preg_match($this->pattern, substr($string, $i), $matches) === 1) {
+    public function getResult($string, $i = 0)
+    {
+        if (preg_match($this->pattern, substr($string, $i), $matches) === 1) {
             return array(
                 "j" => $i + strlen($matches[0]),
                 "args" => $matches
             );
         }
-        throw new ParseFailureException($this." could not match expression ".var_export($this->pattern, true), $i, $string);
+        throw new ParseFailureException($this . " could not match expression " . var_export($this->pattern, true), $i, $string);
     }
 
     // nullable only if regex matches ""
-    public function evaluateNullability() {
+    public function evaluateNullability()
+    {
         return (preg_match($this->pattern, "", $matches) === 1);
     }
 
@@ -260,7 +292,8 @@ class RegexParser extends StaticParser {
 // UTF-8 parser parses one valid UTF-8 character and returns the
 // resulting code point.
 // Callback should accept the character (in the form of bytes)
-class Utf8Parser extends StaticParser {
+class Utf8Parser extends StaticParser
+{
 
     # Some basic useful information about each possible byte
     # sequence i.e. prefix and number of free bits
@@ -270,8 +303,8 @@ class Utf8Parser extends StaticParser {
         array(
             "numbytes" => 1,
             "freebits" => array(7), # 0xxxxxxx
-            "mask"    => "\x80",    # 10000000
-            "result"  => "\x00",    # 00000000
+            "mask" => "\x80",    # 10000000
+            "result" => "\x00",    # 00000000
             "extract" => "\x7F",    # 01111111
             "mincodepoint" => 0,
             "maxcodepoint" => 127
@@ -279,8 +312,8 @@ class Utf8Parser extends StaticParser {
         array(
             "numbytes" => 2,
             "freebits" => array(5, 6), # 110xxxxx 10xxxxxx
-            "mask"    => "\xE0\xC0",   # 11100000 11000000
-            "result"  => "\xC0\x80",   # 11000000 10000000
+            "mask" => "\xE0\xC0",   # 11100000 11000000
+            "result" => "\xC0\x80",   # 11000000 10000000
             "extract" => "\x1F\x3F",   # 00011111 00111111
             "mincodepoint" => 128,
             "maxcodepoint" => 2047
@@ -288,8 +321,8 @@ class Utf8Parser extends StaticParser {
         array(
             "numbytes" => 3,
             "freebits" => array(4, 6, 6), # 1110xxxx 10xxxxxx 10xxxxxx
-            "mask"    => "\xF0\xC0\xC0",  # 11110000 11000000 11000000
-            "result"  => "\xE0\x80\x80",  # 11100000 10000000 10000000
+            "mask" => "\xF0\xC0\xC0",  # 11110000 11000000 11000000
+            "result" => "\xE0\x80\x80",  # 11100000 10000000 10000000
             "extract" => "\x0F\x3F\x3F",  # 00001111 00111111 00111111
             "mincodepoint" => 2048,
             "maxcodepoint" => 65535
@@ -297,8 +330,8 @@ class Utf8Parser extends StaticParser {
         array(
             "numbytes" => 4,
             "freebits" => array(3, 6, 6, 6), # 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
-            "mask"    => "\xF8\xC0\xC0\xC0", # 11111000 11000000 11000000 11000000
-            "result"  => "\xF0\x80\x80\x80", # 11110000 10000000 10000000 10000000
+            "mask" => "\xF8\xC0\xC0\xC0", # 11111000 11000000 11000000 11000000
+            "result" => "\xF0\x80\x80\x80", # 11110000 10000000 10000000 10000000
             "extract" => "\x07\x3F\x3F\x3F", # 00000111 00111111 00111111 00111111
             "mincodepoint" => 65536,
             "maxcodepoint" => 2097151
@@ -358,58 +391,61 @@ class Utf8Parser extends StaticParser {
     # should contain a blacklist of CHARACTERS (i.e. strings), not code points
     private $blacklist;
 
-    public function __construct($blacklist = array(), $callback = null) {
+    public function __construct($blacklist = array(), $callback = null)
+    {
         $this->blacklist = $blacklist;
-        $this->string = "new ".get_class()."(".serialiseArray($blacklist).")";
+        $this->string = "new " . get_class() . "(" . serialiseArray($blacklist) . ")";
         parent::__construct($callback);
     }
 
     // default callback: just return the string that was matched
-    public function defaultCallback() {
+    public function defaultCallback()
+    {
         return func_get_arg(0);
     }
 
-    public function getResult($string, $i = 0) {
+    public function getResult($string, $i = 0)
+    {
 
-        foreach(self::$expressions as $expression) {
+        foreach (self::$expressions as $expression) {
             $length = $expression["numbytes"];
 
             // string is too short to accommodate this expression
             // try next expression
             // (since expressions are in increasing order of size, this is pointless)
-            if(strlen($string) < $i + $length) {
+            if (strlen($string) < $i + $length) {
                 continue;
             }
 
             $character = substr($string, $i, $length);
 
             // string doesn't match expression: try next expression
-            if(($character & $expression["mask"]) !== $expression["result"]) {
+            if (($character & $expression["mask"]) !== $expression["result"]) {
                 continue;
             }
 
             // Character is blacklisted: abandon effort entirely
-            if(in_array($character, $this->blacklist)) {
+            if (in_array($character, $this->blacklist)) {
                 break;
             }
 
             // get code point
             $codepoint = 0;
-            foreach($expression["freebits"] as $byteId => $freebits) {
+            foreach ($expression["freebits"] as $byteId => $freebits) {
                 $codepoint <<= $freebits;
                 $codepoint += ord($string[$i + $byteId] & $expression["extract"][$byteId]);
             }
 
             // overlong encoding: not valid UTF-8, abandon effort entirely
-            if($codepoint < $expression["mincodepoint"]) {
+            if ($codepoint < $expression["mincodepoint"]) {
                 break;
             }
 
             // make sure code point falls inside a safe range
-            foreach(self::$xmlSafeRanges as $range) {
+            foreach (self::$xmlSafeRanges as $range) {
 
                 // code point isn't in range: try next range
-                if($codepoint < $range["bottom"] || $range["top"] < $codepoint) {
+                if ($codepoint < $range["bottom"] || $range["top"] < $codepoint) {
                     continue;
                 }
 
@@ -425,29 +461,31 @@ class Utf8Parser extends StaticParser {
             break;
         }
 
-        throw new ParseFailureException($this." could not find a UTF-8 character", $i, $string);
+        throw new ParseFailureException($this . " could not find a UTF-8 character", $i, $string);
     }
 
     // UTF-8 parser is not nullable.
-    public function evaluateNullability() {
+    public function evaluateNullability()
+    {
         return false;
     }
 
     // convert a Unicode code point into UTF-8 bytes
-    public static function getBytes($codepoint) {
+    public static function getBytes($codepoint)
+    {
 
-        foreach(self::$expressions as $expression) {
+        foreach (self::$expressions as $expression) {
 
             // next expression
-            if($codepoint > $expression["maxcodepoint"]) {
+            if ($codepoint > $expression["maxcodepoint"]) {
                 continue;
             }
 
             // pull out basic numbers
             $string = "";
-            foreach(array_reverse($expression["freebits"]) as $freebits) {
+            foreach (array_reverse($expression["freebits"]) as $freebits) {
                 $x = $codepoint & ((1 << $freebits) - 1);
-                $string = chr($x).$string;
+                $string = chr($x) . $string;
                 $codepoint >>= $freebits;
             }
 
@@ -466,26 +504,30 @@ class Utf8Parser extends StaticParser {
 // This is best used when the input parsers are mutually exclusive
 // callback should accept a single argument which is the single match
 // LazyAltParsers become risky when one is a proper prefix of another
-class LazyAltParser extends MonoParser {
-    public function __construct($internals, $callback = null) {
-        if(count($internals) === 0) {
-            throw new GrammarException("Can't make a ".get_class()." without at least one internal parser.\n");
+class LazyAltParser extends MonoParser
+{
+    public function __construct($internals, $callback = null)
+    {
+        if (count($internals) === 0) {
+            throw new GrammarException("Can't make a " . get_class() . " without at least one internal parser.\n");
         }
         $this->internals = $internals;
-        $this->string = "new ".get_class()."(".serialiseArray($internals).")";
+        $this->string = "new " . get_class() . "(" . serialiseArray($internals) . ")";
         parent::__construct($internals, $callback);
     }
 
     // default callback: return the sole result unmodified
-    public function defaultCallback() {
+    public function defaultCallback()
+    {
         return func_get_arg(0);
     }
 
-    public function getResult($string, $i = 0) {
-        foreach($this->internals as $internal) {
+    public function getResult($string, $i = 0)
+    {
+        foreach ($this->internals as $internal) {
             try {
                 $match = $internal->match($string, $i);
-            } catch(ParseFailureException $e) {
+            } catch (ParseFailureException $e) {
                 continue;
             }
             return array(
@@ -493,13 +535,14 @@ class LazyAltParser extends MonoParser {
                 "args" => array($match["value"])
             );
         }
-        throw new ParseFailureException($this." could not match another token", $i, $string);
+        throw new ParseFailureException($this . " could not match another token", $i, $string);
     }
 
     // Nullable if any internal is nullable.
-    public function evaluateNullability() {
-        foreach($this->internals as $internal) {
-            if($internal->nullable) {
+    public function evaluateNullability()
+    {
+        foreach ($this->internals as $internal) {
+            if ($internal->nullable) {
                 return true;
             }
         }
@@ -507,42 +550,47 @@ class LazyAltParser extends MonoParser {
     }
 
     // every internal is potentially a first.
-    public function firstSet() {
+    public function firstSet()
+    {
         return $this->internals;
     }
 }
 
 // Callback accepts a single argument containing all submatches, however many
-class GreedyMultiParser extends MonoParser {
+class GreedyMultiParser extends MonoParser
+{
     private $lower;
     public $optional;
 
-    public function __construct($internal, $lower, $upper, $callback = null) {
+    public function __construct($internal, $lower, $upper, $callback = null)
+    {
         $this->lower = $lower;
-        if(is_null($upper)) {
+        if (is_null($upper)) {
             $this->optional = null;
         } else {
-            if($upper < $lower) {
-                throw new GrammarException("Can't create a ".get_class()." with lower limit ".var_export($lower, true)." and upper limit ".var_export($upper, true));
+            if ($upper < $lower) {
+                throw new GrammarException("Can't create a " . get_class() . " with lower limit " . var_export($lower, true) . " and upper limit " . var_export($upper, true));
             }
             $this->optional = $upper - $lower;
         }
-        $this->string = "new ".get_class()."(".$internal.", ".var_export($lower, true).", ".var_export($upper, true).")";
+        $this->string = "new " . get_class() . "(" . $internal . ", " . var_export($lower, true) . ", " . var_export($upper, true) . ")";
         parent::__construct(array($internal), $callback);
     }
 
     // default callback: just return the list
-    public function defaultCallback() {
+    public function defaultCallback()
+    {
         return func_get_args();
     }
 
-    public function getResult($string, $i = 0) {
+    public function getResult($string, $i = 0)
+    {
 
         $result = array("j" => $i, "args" => array());
 
         // First do the non-optional segment
         // Any parse failures here are terminal
-        for($k = 0; $k < $this->lower; $k++) {
+        for ($k = 0; $k < $this->lower; $k++) {
             $match = $this->internals[0]->match($string, $result["j"]);
             $result["j"] = $match["j"];
             $result["args"][] = $match["value"];
@@ -550,12 +598,12 @@ class GreedyMultiParser extends MonoParser {
 
         // next, the optional segment
         // null => no upper limit
-        for($k = 0; $this->optional === null || $k < $this->optional; $k++) {
+        for ($k = 0; $this->optional === null || $k < $this->optional; $k++) {
             try {
                 $match = $this->internals[0]->match($string, $result["j"]);
                 $result["j"] = $match["j"];
                 $result["args"][] = $match["value"];
-            } catch(ParseFailureException $e) {
+            } catch (ParseFailureException $e) {
                 break;
             }
         }
@@ -563,42 +611,50 @@ class GreedyMultiParser extends MonoParser {
     }
 
     // nullable if lower limit is zero OR internal is nullable.
-    public function evaluateNullability() {
+    public function evaluateNullability()
+    {
         return ($this->lower == 0 || $this->internals[0]->nullable === true);
     }
 
     // This parser contains only one internal
-    public function firstSet() {
+    public function firstSet()
+    {
         return array($this->internals[0]);
     }
 }
 
 // Tiny subclass is ironically much more useful than GreedyMultiParser
-class GreedyStarParser extends GreedyMultiParser {
-    public function __construct($internal, $callback = null) {
-        $this->string = "new ".get_class()."(".$internal.")";
+class GreedyStarParser extends GreedyMultiParser
+{
+    public function __construct($internal, $callback = null)
+    {
+        $this->string = "new " . get_class() . "(" . $internal . ")";
         parent::__construct($internal, 0, null, $callback);
     }
 }
 
 // Match several things in a row. Callback should accept one argument
 // for each parser listed.
-class ConcParser extends MonoParser {
-    public function __construct($internals, $callback = null) {
-        $this->string = "new ".get_class()."(".serialiseArray($internals).")";
+class ConcParser extends MonoParser
+{
+    public function __construct($internals, $callback = null)
+    {
+        $this->string = "new " . get_class() . "(" . serialiseArray($internals) . ")";
         parent::__construct($internals, $callback);
     }
 
     // Default callback (this should be used rarely) returns all arguments as
     // an array. In the majority of cases the user should specify a callback.
-    public function defaultCallback() {
+    public function defaultCallback()
+    {
         return func_get_args();
     }
 
-    public function getResult($string, $i = 0) {
+    public function getResult($string, $i = 0)
+    {
         $j = $i;
         $args = array();
-        foreach($this->internals as $parser) {
+        foreach ($this->internals as $parser) {
             $match = $parser->match($string, $j);
             $j = $match["j"];
             $args[] = $match["value"];
@@ -607,16 +663,17 @@ class ConcParser extends MonoParser {
     }
 
     // First-set is built up as follows...
-    function firstSet() {
+    function firstSet()
+    {
         $firstSet = array();
-        foreach($this->internals as $internal) {
+        foreach ($this->internals as $internal) {
             // The first $internal is always in the first-set
             $firstSet[] = $internal;
 
             // If $internal was nullable, then the next internal in the
             // list is also in the first-set, so continue the loop.
             // Otherwise we are done.
-            if(!$internal->nullable) {
+            if (!$internal->nullable) {
                 break;
             }
         }
@@ -624,9 +681,10 @@ class ConcParser extends MonoParser {
     }
 
     // only nullable if everything in the list is nullable
-    public function evaluateNullability() {
-        foreach($this->internals as $internal) {
-            if(!$internal->nullable) {
+    public function evaluateNullability()
+    {
+        foreach ($this->internals as $internal) {
+            if (!$internal->nullable) {
                 return false;
             }
         }
@@ -638,18 +696,20 @@ class ConcParser extends MonoParser {
 // necessary so that the parser names used in the constructions of each
 // parser can actually refer to other parsers instead of just being
 // useless strings.
-class Grammar extends MonoParser {
+class Grammar extends MonoParser
+{
 
     // All parsing begins with the parser of this name.
     // $S should not be an actual parser
     private $S;
 
-    public function __construct($S, $internals, $callback = null) {
-        $this->string = "new ".get_class()."(".var_export($S, true).", ".serialiseArray($internals).")";
+    public function __construct($S, $internals, $callback = null)
+    {
+        $this->string = "new " . get_class() . "(" . var_export($S, true) . ", " . serialiseArray($internals) . ")";
         parent::__construct($internals, $callback);
 
-        if(!array_key_exists($S, $this->internals)) {
-            throw new GrammarException("This grammar begins with rule '".var_export($S, true)."' but no parser with this name was given.");
+        if (!array_key_exists($S, $this->internals)) {
+            throw new GrammarException("This grammar begins with rule '" . var_export($S, true) . "' but no parser with this name was given.");
         }
         $this->S = $S;
 
@@ -674,13 +734,13 @@ class Grammar extends MonoParser {
         // of parsers has to be evaluated by "bubbling up" nullability states
         // until we are certain that all nullable parsers have been marked as such.
         // It is not unlike a "flood fill" procedure.
-        while(1) {
-            foreach($this->internals as $internal) {
-                if($internal->nullable === true) {
+        while (1) {
+            foreach ($this->internals as $internal) {
+                if ($internal->nullable === true) {
                     continue;
                 }
 
-                if(!$internal->evaluateNullability()) {
+                if (!$internal->evaluateNullability()) {
                     continue;
                 }
 
@@ -703,26 +763,26 @@ class Grammar extends MonoParser {
 
         // This in turn is necessary to detect left recursion, which occurs
         // if and only if a parser contains ITSELF in its own extended first-set.
-        foreach($this->internals as $internal) {
+        foreach ($this->internals as $internal) {
 
             // Find the extended first-set of this parser. If this parser is
             // contained in its own first-set, then it is left-recursive.
             // This has to be called after the "nullability flood fill" is complete.
             $firstSet = array($internal);
             $i = 0;
-            while($i < count($firstSet)) {
+            while ($i < count($firstSet)) {
                 $current = $firstSet[$i];
-                foreach($current->firstSet() as $next) {
+                foreach ($current->firstSet() as $next) {
 
                     // Left-recursion
-                    if($next === $internal) {
-                        throw new GrammarException("This grammar is left-recursive in ".$internal.".");
+                    if ($next === $internal) {
+                        throw new GrammarException("This grammar is left-recursive in " . $internal . ".");
                     }
 
                     // If it's already in the list, then skip it
                     // this DOESN'T imply left-recursion, though
-                    for($j = 0; $j < count($firstSet); $j++) {
-                        if($next === $firstSet[$j]) {
+                    for ($j = 0; $j < count($firstSet); $j++) {
+                        if ($next === $firstSet[$j]) {
                             continue(2);
                         }
                     }
@@ -738,16 +798,16 @@ class Grammar extends MonoParser {
         // string of zero length, and it has an unbounded upper limit, then
         // it is going to loop forever.
         // In this situation, we raise a very serious error
-        foreach($this->internals as $internal) {
-            if(!is_a($internal, "GreedyMultiParser")) {
+        foreach ($this->internals as $internal) {
+            if (!is_a($internal, "GreedyMultiParser")) {
                 continue;
             }
-            if($internal->optional !== null) {
+            if ($internal->optional !== null) {
                 continue;
             }
 
-            if($internal->internals[0]->nullable) {
-                throw new GrammarException($internal." has internal parser ".$internal->internals[0].", which matches the empty string. This will cause infinite loops when parsing.");
+            if ($internal->internals[0]->nullable) {
+                throw new GrammarException($internal . " has internal parser " . $internal->internals[0] . ", which matches the empty string. This will cause infinite loops when parsing.");
             }
         }
     }
@@ -760,19 +820,20 @@ class Grammar extends MonoParser {
     // real parsers, no longer strings.
     // Be cautious modifying this code, it was constructed quite delicately to
     // avoid infinite loops
-    private function resolve($parser) {
+    private function resolve($parser)
+    {
 
         $keys = array_keys($parser->internals);
-        for($i = 0; $i < count($keys); $i++) {
+        for ($i = 0; $i < count($keys); $i++) {
             $key = $keys[$i];
 
             // replace names with references
-            if(is_string($parser->internals[$key])) {
+            if (is_string($parser->internals[$key])) {
 
                 // make sure the other parser that we're about to create a reference to actually exists
                 $name = $parser->internals[$key];
-                if(!array_key_exists($name, $this->internals)) {
-                    throw new GrammarException($parser." contains a reference to another parser ".var_export($name, true)." which cannot be found");
+                if (!array_key_exists($name, $this->internals)) {
+                    throw new GrammarException($parser . " contains a reference to another parser " . var_export($name, true) . " which cannot be found");
                 }
 
                 // create that reference
@@ -790,12 +851,14 @@ class Grammar extends MonoParser {
 
     // default callback (this should be rarely modified) returns
     // first argument only
-    public function defaultCallback() {
+    public function defaultCallback()
+    {
         return func_get_arg(0);
     }
 
     // use the "main" internal parser, S
-    public function getResult($string, $i = 0) {
+    public function getResult($string, $i = 0)
+    {
         $match = $this->internals[$this->S]->match($string, $i);
         return array(
             "j" => $match["j"],
@@ -804,12 +867,14 @@ class Grammar extends MonoParser {
     }
 
     // nullable iff <S> is nullable
-    public function evaluateNullability() {
+    public function evaluateNullability()
+    {
         return ($this->internals[$this->S]->nullable === true);
     }
 
     // S is the first
-    public function firstSet() {
+    public function firstSet()
+    {
         return array($this->internals[$this->S]);
     }
 }
