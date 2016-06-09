@@ -77,7 +77,7 @@ abstract class MonoParser {
             throw new GrammarException(var_export($internals, true)." should be an array");
         }
         foreach($internals as $internal) {
-            if(!is_string($internal) && !is_a($internal, "MonoParser")) {
+            if(!is_string($internal) && !($internal instanceof MonoParser)) {
                 throw new GrammarException(var_export($internal, true)." should be either a string or a MonoParser");
             }
         }
