@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<project name="Project tests" default="test">
+    <target name="test">
+        <exec command="vendor/bin/parallel-lint --exclude app --exclude vendor ." checkreturn="true" passthru="true"/>
+        <exec command="vendor/bin/phpcs --colors -wp src  --standard=PSR2,phpcs.xml" checkreturn="true" passthru="true"/>
+        <php function="realpath" returnProperty="unit.file">
+            <param value="${project.basedir}/tests/unit.php"/>
+        </php>
+        <exec command="/usr/bin/env php ${unit.file}" passthru="true"/>
+    </target>
+</project>

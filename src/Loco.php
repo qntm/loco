@@ -243,7 +243,6 @@ class StringParser extends StaticParser
     {
         return ($this->needle === "");
     }
-
 }
 
 // Parser uses a regex to match itself. Regexes are time-consuming to execute,
@@ -286,7 +285,6 @@ class RegexParser extends StaticParser
     {
         return (preg_match($this->pattern, "", $matches) === 1);
     }
-
 }
 
 // UTF-8 parser parses one valid UTF-8 character and returns the
@@ -406,7 +404,6 @@ class Utf8Parser extends StaticParser
 
     public function getResult($string, $i = 0)
     {
-
         foreach (self::$expressions as $expression) {
             $length = $expression["numbytes"];
 
@@ -443,7 +440,6 @@ class Utf8Parser extends StaticParser
 
             // make sure code point falls inside a safe range
             foreach (self::$xmlSafeRanges as $range) {
-
                 // code point isn't in range: try next range
                 if ($codepoint < $range["bottom"] || $range["top"] < $codepoint) {
                     continue;
@@ -473,9 +469,7 @@ class Utf8Parser extends StaticParser
     // convert a Unicode code point into UTF-8 bytes
     public static function getBytes($codepoint)
     {
-
         foreach (self::$expressions as $expression) {
-
             // next expression
             if ($codepoint > $expression["maxcodepoint"]) {
                 continue;
@@ -493,9 +487,7 @@ class Utf8Parser extends StaticParser
             $string |= $expression["result"];
             return $string;
         }
-
     }
-
 }
 
 // Takes the input parsers and applies them all in turn. "Lazy" indicates
@@ -569,11 +561,13 @@ class GreedyMultiParser extends MonoParser
             $this->optional = null;
         } else {
             if ($upper < $lower) {
-                throw new GrammarException("Can't create a " . get_class() . " with lower limit " . var_export($lower, true) . " and upper limit " . var_export($upper, true));
+                throw new GrammarException("Can't create a " . get_class() . " with lower limit " . var_export($lower, true)
+                    . " and upper limit " . var_export($upper, true));
             }
             $this->optional = $upper - $lower;
         }
-        $this->string = "new " . get_class() . "(" . $internal . ", " . var_export($lower, true) . ", " . var_export($upper, true) . ")";
+        $this->string = "new " . get_class() . "(" . $internal . ", " . var_export($lower, true) . ", " . var_export($upper, true)
+            . ")";
         parent::__construct(array($internal), $callback);
     }
 
@@ -663,7 +657,7 @@ class ConcParser extends MonoParser
     }
 
     // First-set is built up as follows...
-    function firstSet()
+    public function firstSet()
     {
         $firstSet = array();
         foreach ($this->internals as $internal) {
@@ -709,7 +703,8 @@ class Grammar extends MonoParser
         parent::__construct($internals, $callback);
 
         if (!array_key_exists($S, $this->internals)) {
-            throw new GrammarException("This grammar begins with rule '" . var_export($S, true) . "' but no parser with this name was given.");
+            throw new GrammarException("This grammar begins with rule '" . var_export($S, true)
+                . "' but no parser with this name was given.");
         }
         $this->S = $S;
 
@@ -764,7 +759,6 @@ class Grammar extends MonoParser
         // This in turn is necessary to detect left recursion, which occurs
         // if and only if a parser contains ITSELF in its own extended first-set.
         foreach ($this->internals as $internal) {
-
             // Find the extended first-set of this parser. If this parser is
             // contained in its own first-set, then it is left-recursive.
             // This has to be called after the "nullability flood fill" is complete.
@@ -773,7 +767,6 @@ class Grammar extends MonoParser
             while ($i < count($firstSet)) {
                 $current = $firstSet[$i];
                 foreach ($current->firstSet() as $next) {
-
                     // Left-recursion
                     if ($next === $internal) {
                         throw new GrammarException("This grammar is left-recursive in " . $internal . ".");
@@ -807,7 +800,8 @@ class Grammar extends MonoParser
             }
 
             if ($internal->internals[0]->nullable) {
-                throw new GrammarException($internal . " has internal parser " . $internal->internals[0] . ", which matches the empty string. This will cause infinite loops when parsing.");
+                throw new GrammarException($internal . " has internal parser " . $internal->internals[0]
+                    . ", which matches the empty string. This will cause infinite loops when parsing.");
             }
         }
     }
@@ -829,20 +823,18 @@ class Grammar extends MonoParser
 
             // replace names with references
             if (is_string($parser->internals[$key])) {
-
                 // make sure the other parser that we're about to create a reference to actually exists
                 $name = $parser->internals[$key];
                 if (!array_key_exists($name, $this->internals)) {
-                    throw new GrammarException($parser . " contains a reference to another parser " . var_export($name, true) . " which cannot be found");
+                    throw new GrammarException($parser . " contains a reference to another parser " . var_export($name, true)
+                        . " which cannot be found");
                 }
 
                 // create that reference
                 $parser->internals[$key] =& $this->internals[$name];
-            }
-
-            // already a parser? No need to replace it!
-            // but we do need to recurse!
-            else {
+            } else {
+                // already a parser? No need to replace it!
+                // but we do need to recurse!
                 $parser->internals[$key] = $this->resolve($parser->internals[$key]);
             }
         }

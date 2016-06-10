@@ -9,6 +9,12 @@
   "require": {
     "php": ">=5.3.0"
   },
+  "require-dev": {
+    "squizlabs/php_codesniffer": "^2.3",
+    "phpunit/phpunit": "4.*",
+    "phpunit/phpcov": "*",
+    "jakub-onderka/php-parallel-lint": "0.*"
+  },
   "autoload": {
     "files": [
       "src/Loco.php"

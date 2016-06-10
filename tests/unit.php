@@ -7,6 +7,8 @@
  */
 namespace Ferno\Loco;
 
+use Exception;
+
 require_once __DIR__ . '/../src/Loco.php';
 
 // if executing this file directly, run unit tests
