@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset name="Selective Standard">
+    <description>Project Coding Standard</description>
+    <file>./src</file>
+    <rule ref="PSR2">
+        <exclude name="Squiz.WhiteSpace.ControlStructureSpacing"/>
+    </rule>
+    <rule ref="Generic.Files.LineLength">
+        <properties>
+            <property phpcs-only="true" name="lineLimit" value="130"/>
+            <property phpcbf-only="true" name="lineLimit" value="150"/>
+        </properties>
+    </rule>
+    <rule ref="PSR1.Classes.ClassDeclaration.MultipleClasses">
+        <severity>0</severity>
+    </rule>
+</ruleset>
