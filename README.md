@@ -239,7 +239,7 @@ Here's a simple `Ferno\Loco\Grammar` which can recognise (some) valid HTML parag
 
 Loco also comes with a collection of public domain examples:
 
-### [examples/json.php](https://github.com/ferno/loco/blob/master/examoples/json.php)
+### [examples/json.php](https://github.com/ferno/loco/blob/master/examples/json.php)
 
 Parse [JSON](http://json.org/) expressions and returns PHP arrays.
 
@@ -247,7 +247,7 @@ Parse [JSON](http://json.org/) expressions and returns PHP arrays.
 
 Parse simple regular expressions and return PHP objects representing them.
 
-### [examples/simpleComment.php](https://github.com/ferno/loco/blob/master/exa,ples/simpleComment.php)
+### [examples/simpleComment.php](https://github.com/ferno/loco/blob/master/examples/simpleComment.php)
 
 Recognise simple valid HTML text using `<h5>`, `<p>`, `<em>` and `<strong>`, with balanced tags and escaped entities.
 
