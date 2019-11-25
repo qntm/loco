@@ -17,5 +17,6 @@
     "files": [
       "src/Loco.php"
     ]
-  }
+  },
+  "license": "MIT"
 }
