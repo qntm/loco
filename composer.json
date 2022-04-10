@@ -5,13 +5,13 @@
     "parsing",
     "lexer"
   ],
-  "homepage": "http://qntm.org/loco",
+  "homepage": "https://github.com/qntm/loco",
   "require": {
-    "php": ">=5.3.0"
+    "php": ">=5.6.40"
   },
   "require-dev": {
     "squizlabs/php_codesniffer": "^2.3",
-    "jakub-onderka/php-parallel-lint": "0.*"
+    "php-parallel-lint/php-parallel-lint": "^1.3"
   },
   "autoload": {
     "files": [
