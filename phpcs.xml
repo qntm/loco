@@ -14,4 +14,7 @@
     <rule ref="PSR1.Classes.ClassDeclaration.MultipleClasses">
         <severity>0</severity>
     </rule>
+    <rule ref="Generic.Files.LineEndings">
+        <severity>0</severity>
+    </rule>
 </ruleset>
