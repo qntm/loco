@@ -12,317 +12,317 @@ require_once __DIR__ . '/../vendor/autoload.php';
 # http://qntm.org/locoparser
 
 $locoGrammar = new Grammar(
-	"<grammar>",
-	array(
-		"<grammar>" => new ConcParser(
-			array("<whitespace>", "<rules>"),
-			function($whitespace, $rules) {
-				return $rules;
-			}
-		),
+    "<grammar>",
+    array(
+        "<grammar>" => new ConcParser(
+            array("<whitespace>", "<rules>"),
+            function($whitespace, $rules) {
+                return $rules;
+            }
+        ),
 
-		"<rules>" => new GreedyStarParser(
-			"<ruleorblankline>",
-			function() {
-				$rules = array();
-				foreach(func_get_args() as $ruleorblankline) {
-					if($ruleorblankline === null) {
-						continue;
-					}
-					$rules[] = $ruleorblankline;
-				}
-				return $rules;
-			}
-		),
+        "<rules>" => new GreedyStarParser(
+            "<ruleorblankline>",
+            function() {
+                $rules = array();
+                foreach(func_get_args() as $ruleorblankline) {
+                    if($ruleorblankline === null) {
+                        continue;
+                    }
+                    $rules[] = $ruleorblankline;
+                }
+                return $rules;
+            }
+        ),
 
-		"<ruleorblankline>" => new LazyAltParser(
-			array("<rule>", "<blankline>")
-		),
+        "<ruleorblankline>" => new LazyAltParser(
+            array("<rule>", "<blankline>")
+        ),
 
-		"<blankline>" => new ConcParser(
-			array(
-				new RegexParser("#^\r?\n#"),
-				"<whitespace>"
-			),
-			function() {
-				return null;
-			}
-		),
+        "<blankline>" => new ConcParser(
+            array(
+                new RegexParser("#^\r?\n#"),
+                "<whitespace>"
+            ),
+            function() {
+                return null;
+            }
+        ),
 
-		"<rule>" => new ConcParser(
-			array(
-				"<bareword>",
-				"<whitespace>",
-				new StringParser("::="),
-				"<whitespace>",
-				"<lazyaltparser>"
-			),
-			function($bareword, $whitespace1, $equals, $whitespace2, $lazyaltparser) {
-				return array(
-					"name" => $bareword,
-					"lazyaltparser" => $lazyaltparser
-				);
-			}
-		),
-		
-		"<lazyaltparser>" => new ConcParser(
-			array("<concparser>", "<pipeconcparserlist>"),
-			function($concparser, $pipeconcparserlist) {
-				array_unshift($pipeconcparserlist, $concparser);
+        "<rule>" => new ConcParser(
+            array(
+                "<bareword>",
+                "<whitespace>",
+                new StringParser("::="),
+                "<whitespace>",
+                "<lazyaltparser>"
+            ),
+            function($bareword, $whitespace1, $equals, $whitespace2, $lazyaltparser) {
+                return array(
+                    "name" => $bareword,
+                    "lazyaltparser" => $lazyaltparser
+                );
+            }
+        ),
 
-				// make a basic lazyaltparser which returns whatever.
-				// Since the LazyAltParser always contains 0 or more ConcParsers,
-				// the value of $result is always an array
-				return new LazyAltParser(
-					$pipeconcparserlist
-				);
-			}
-		),
+        "<lazyaltparser>" => new ConcParser(
+            array("<concparser>", "<pipeconcparserlist>"),
+            function($concparser, $pipeconcparserlist) {
+                array_unshift($pipeconcparserlist, $concparser);
 
-		"<pipeconcparserlist>" => new GreedyStarParser("<pipeconcparser>"),
+                // make a basic lazyaltparser which returns whatever.
+                // Since the LazyAltParser always contains 0 or more ConcParsers,
+                // the value of $result is always an array
+                return new LazyAltParser(
+                    $pipeconcparserlist
+                );
+            }
+        ),
 
-		"<pipeconcparser>" => new ConcParser(
-			array(
-				new StringParser("|"),
-				"<whitespace>",
-				"<concparser>"
-			),
-			function($pipe, $whitespace, $concparser) { return $concparser; }
-		),
+        "<pipeconcparserlist>" => new GreedyStarParser("<pipeconcparser>"),
 
-		"<concparser>" => new GreedyStarParser(
-			"<bnfmultiplication>",
-			function() {
-				// get array key numbers where multiparsers are located
-				// in reverse order so that our splicing doesn't modify the array
-				$multiparsers = array();
-				foreach(func_get_args() as $k => $internal) {
-					if(is_a($internal, "GreedyMultiParser")) {
-						array_unshift($multiparsers, $k);
-					}
-				}
+        "<pipeconcparser>" => new ConcParser(
+            array(
+                new StringParser("|"),
+                "<whitespace>",
+                "<concparser>"
+            ),
+            function($pipe, $whitespace, $concparser) { return $concparser; }
+        ),
 
-				// We do something quite advanced here. The inner multiparsers are
-				// spliced out into the list of arguments proper instead of forming an
-				// internal sub-array of their own
-				return new ConcParser(
-					func_get_args(),
-					function() use ($multiparsers) {
-						$args = func_get_args();
-						foreach($multiparsers as $k) {
-							array_splice($args, $k, 1, $args[$k]);
-						}
-						return $args;
-					}
-				);
-			}
-		),
-	
-		"<bnfmultiplication>" => new ConcParser(
-			array("<bnfmultiplicand>", "<whitespace>", "<bnfmultiplier>", "<whitespace>"),
-			function($bnfmultiplicand, $whitespace1, $bnfmultiplier, $whitespace2) {
+        "<concparser>" => new GreedyStarParser(
+            "<bnfmultiplication>",
+            function() {
+                // get array key numbers where multiparsers are located
+                // in reverse order so that our splicing doesn't modify the array
+                $multiparsers = array();
+                foreach(func_get_args() as $k => $internal) {
+                    if(is_a($internal, "GreedyMultiParser")) {
+                        array_unshift($multiparsers, $k);
+                    }
+                }
 
-				if(is_array($bnfmultiplier)) {
-					return new GreedyMultiParser(
-						$bnfmultiplicand,
-						$bnfmultiplier["lower"],
-						$bnfmultiplier["upper"]
-					);
-				}
-				
-				// otherwise assume multiplier = 1
-				return $bnfmultiplicand;
-			}
-		),
+                // We do something quite advanced here. The inner multiparsers are
+                // spliced out into the list of arguments proper instead of forming an
+                // internal sub-array of their own
+                return new ConcParser(
+                    func_get_args(),
+                    function() use ($multiparsers) {
+                        $args = func_get_args();
+                        foreach($multiparsers as $k) {
+                            array_splice($args, $k, 1, $args[$k]);
+                        }
+                        return $args;
+                    }
+                );
+            }
+        ),
 
-		"<bnfmultiplicand>" => new LazyAltParser(
-			array(
-				 "<bareword>"        // i.e. the name of another rule elsewhere in the grammar
-				, "<dqstringparser>" // double-quoted string e.g. "fred"
-				, "<sqstringparser>" // single-quoted string e.g. 'velma'
-				, "<regexparser>"    // slash-quoted regex e.g. /[a-zA-Z_][a-zA-Z_0-9]*/
-				, "<utf8except>"     // e.g. [^abcdef]
-				, "<utf8parser>"     // i.e. a single full stop, .
-				, "<subparser>"      // another expression inside parentheses e.g. ( firstname lastname )
-			)
-		),
+        "<bnfmultiplication>" => new ConcParser(
+            array("<bnfmultiplicand>", "<whitespace>", "<bnfmultiplier>", "<whitespace>"),
+            function($bnfmultiplicand, $whitespace1, $bnfmultiplier, $whitespace2) {
 
-		"<bnfmultiplier>" => new LazyAltParser(
-			array("<asterisk>", "<plus>", "<questionmark>", "<emptymultiplier>")
-		),
+                if(is_array($bnfmultiplier)) {
+                    return new GreedyMultiParser(
+                        $bnfmultiplicand,
+                        $bnfmultiplier["lower"],
+                        $bnfmultiplier["upper"]
+                    );
+                }
 
-		"<asterisk>" => new StringParser(
-			"*",
-			function() { return array("lower" => 0, "upper" => null); }
-		),
-		
-		"<plus>" => new StringParser(
-			"+",
-			function() { return array("lower" => 1, "upper" => null); }
-		),
-		
-		"<questionmark>" => new StringParser(
-			"?",
-			function() { return array("lower" => 0, "upper" => 1); }
-		),
-		
-		"<emptymultiplier>" => new EmptyParser(),
+                // otherwise assume multiplier = 1
+                return $bnfmultiplicand;
+            }
+        ),
 
-		// return a basic parser which recognises this string
-		"<dqstringparser>" => new ConcParser(
-			array(
-				new StringParser("\""),
-				"<dqstring>",
-				new StringParser("\"")
-			),
-			function($quote1, $string, $quote2) {
-				if($string === "") {
-					return new EmptyParser();
-				}
-				return new StringParser($string);
-			}
-		),
+        "<bnfmultiplicand>" => new LazyAltParser(
+            array(
+                 "<bareword>"        // i.e. the name of another rule elsewhere in the grammar
+                , "<dqstringparser>" // double-quoted string e.g. "fred"
+                , "<sqstringparser>" // single-quoted string e.g. 'velma'
+                , "<regexparser>"    // slash-quoted regex e.g. /[a-zA-Z_][a-zA-Z_0-9]*/
+                , "<utf8except>"     // e.g. [^abcdef]
+                , "<utf8parser>"     // i.e. a single full stop, .
+                , "<subparser>"      // another expression inside parentheses e.g. ( firstname lastname )
+            )
+        ),
 
-		"<sqstringparser>" => new ConcParser(
-			array(
-				new StringParser("'"),
-				"<sqstring>",
-				new StringParser("'")
-			),
-			function($apostrophe1, $string, $apostrophe2) {
-				if($string === "") {
-					return new EmptyParser();
-				}
-				return new StringParser($string);
-			}
-		),
+        "<bnfmultiplier>" => new LazyAltParser(
+            array("<asterisk>", "<plus>", "<questionmark>", "<emptymultiplier>")
+        ),
 
-		"<dqstring>" => new GreedyStarParser(
-			"<dqstrchar>",
-			function() { return implode("", func_get_args()); }
-		),
-		
-		"<sqstring>" => new GreedyStarParser(
-			"<sqstrchar>",
-			function() { return implode("", func_get_args()); }
-		),
+        "<asterisk>" => new StringParser(
+            "*",
+            function() { return array("lower" => 0, "upper" => null); }
+        ),
 
-		"<dqstrchar>" => new LazyAltParser(
-			array(
-				new Utf8Parser(array("\\", "\"")),
-				new StringParser("\\\\", function($string) { return "\\"; }),
-				new StringParser('\\"', function($string) { return '"'; })
-			)
-		),
-		
-		"<sqstrchar>" => new LazyAltParser(
-			array(
-				new Utf8Parser(array("\\", "'")),
-				new StringParser("\\\\", function($string) { return "\\"; }),
-				new StringParser("\\'" , function($string) { return "'"; })
-			)
-		),
+        "<plus>" => new StringParser(
+            "+",
+            function() { return array("lower" => 1, "upper" => null); }
+        ),
 
-		// return a basic parser matching this regex
-		"<regexparser>" => new ConcParser(
-			array(
-				new StringParser("/"),
-				"<regex>",
-				new StringParser("/")
-			),
-			function($slash1, $regex, $slash2) {
-				if($regex === "") {
-					return new EmptyParser();
-				}
+        "<questionmark>" => new StringParser(
+            "?",
+            function() { return array("lower" => 0, "upper" => 1); }
+        ),
 
-				// Add the anchor and the brackets to make sure it anchors in the
-				// correct location
-				$regex = "/^(".$regex.")/";
-				// print("Actual regex is: ".$regex."\n");
-				return new RegexParser($regex);
-			}
-		),
-		
-		"<regex>" => new GreedyStarParser(
-			"<rechar>",
-			function() { return implode("", func_get_args()); }
-		),
-		
-		// Regular expression contains: Any single character that is not a slash or backslash...
-		// OR any single character escaped by a backslash. Return as literal.
-		"<rechar>" => new LazyAltParser(
-			array(
-				new Utf8Parser(array("\\", "/")),
-				new ConcParser(
-					array(
-						new StringParser("\\"),
-						new Utf8Parser()
-					),
-					function($backslash, $char) {
-						return $backslash.$char;
-					}
-				)
-			)
-		),
+        "<emptymultiplier>" => new EmptyParser(),
 
-		"<utf8except>" => new ConcParser(
-			array(
-				new StringParser("[^"),
-				"<exceptions>",
-				new StringParser("]")
-			),
-			function($left_bracket_caret, $exceptions, $right_bracket) {
-				return new Utf8Parser($exceptions);
-			}
-		),
-		
-		"<exceptions>" => new GreedyStarParser("<exceptionchar>"),
-		
-		"<exceptionchar>" => new LazyAltParser(
-			array(
-				new Utf8Parser(array("\\", "]")),
-				new StringParser("\\\\", function($string) { return "\\"; }),
-				new StringParser("\\]" , function($string) { return "]"; })
-			)
-		),
+        // return a basic parser which recognises this string
+        "<dqstringparser>" => new ConcParser(
+            array(
+                new StringParser("\""),
+                "<dqstring>",
+                new StringParser("\"")
+            ),
+            function($quote1, $string, $quote2) {
+                if($string === "") {
+                    return new EmptyParser();
+                }
+                return new StringParser($string);
+            }
+        ),
 
-		"<utf8parser>" => new StringParser(
-			".",
-			function() {
-				return new Utf8Parser(array());
-			}
-		),
-		
-		"<subparser>" => new ConcParser(
-			array(
-				new StringParser("("),
-				"<whitespace>",
-				"<lazyaltparser>",
-				new StringParser(")")
-			),
-			function($left_parenthesis, $whitespace1, $lazyaltparser, $right_parenthesis) {
-				return $lazyaltparser;
-			}
-		),
-		
-		"<whitespace>"         => new  RegexParser("#^[ \t]*#"),
-		"<bareword>"           => new  RegexParser("#^[a-zA-Z_][a-zA-Z0-9_]*#")
-	),
-	function($rules) {
-		$parsers = array();
-		foreach($rules as $rule) {
-			if(count($parsers) === 0) {
-				$top = $rule["name"];
-			}
-			$parsers[$rule["name"]] = $rule["lazyaltparser"];
-		}
-		return new Grammar($top, $parsers);
-	}
+        "<sqstringparser>" => new ConcParser(
+            array(
+                new StringParser("'"),
+                "<sqstring>",
+                new StringParser("'")
+            ),
+            function($apostrophe1, $string, $apostrophe2) {
+                if($string === "") {
+                    return new EmptyParser();
+                }
+                return new StringParser($string);
+            }
+        ),
+
+        "<dqstring>" => new GreedyStarParser(
+            "<dqstrchar>",
+            function() { return implode("", func_get_args()); }
+        ),
+
+        "<sqstring>" => new GreedyStarParser(
+            "<sqstrchar>",
+            function() { return implode("", func_get_args()); }
+        ),
+
+        "<dqstrchar>" => new LazyAltParser(
+            array(
+                new Utf8Parser(array("\\", "\"")),
+                new StringParser("\\\\", function($string) { return "\\"; }),
+                new StringParser('\\"', function($string) { return '"'; })
+            )
+        ),
+
+        "<sqstrchar>" => new LazyAltParser(
+            array(
+                new Utf8Parser(array("\\", "'")),
+                new StringParser("\\\\", function($string) { return "\\"; }),
+                new StringParser("\\'" , function($string) { return "'"; })
+            )
+        ),
+
+        // return a basic parser matching this regex
+        "<regexparser>" => new ConcParser(
+            array(
+                new StringParser("/"),
+                "<regex>",
+                new StringParser("/")
+            ),
+            function($slash1, $regex, $slash2) {
+                if($regex === "") {
+                    return new EmptyParser();
+                }
+
+                // Add the anchor and the brackets to make sure it anchors in the
+                // correct location
+                $regex = "/^(".$regex.")/";
+                // print("Actual regex is: ".$regex."\n");
+                return new RegexParser($regex);
+            }
+        ),
+
+        "<regex>" => new GreedyStarParser(
+            "<rechar>",
+            function() { return implode("", func_get_args()); }
+        ),
+
+        // Regular expression contains: Any single character that is not a slash or backslash...
+        // OR any single character escaped by a backslash. Return as literal.
+        "<rechar>" => new LazyAltParser(
+            array(
+                new Utf8Parser(array("\\", "/")),
+                new ConcParser(
+                    array(
+                        new StringParser("\\"),
+                        new Utf8Parser()
+                    ),
+                    function($backslash, $char) {
+                        return $backslash.$char;
+                    }
+                )
+            )
+        ),
+
+        "<utf8except>" => new ConcParser(
+            array(
+                new StringParser("[^"),
+                "<exceptions>",
+                new StringParser("]")
+            ),
+            function($left_bracket_caret, $exceptions, $right_bracket) {
+                return new Utf8Parser($exceptions);
+            }
+        ),
+
+        "<exceptions>" => new GreedyStarParser("<exceptionchar>"),
+
+        "<exceptionchar>" => new LazyAltParser(
+            array(
+                new Utf8Parser(array("\\", "]")),
+                new StringParser("\\\\", function($string) { return "\\"; }),
+                new StringParser("\\]" , function($string) { return "]"; })
+            )
+        ),
+
+        "<utf8parser>" => new StringParser(
+            ".",
+            function() {
+                return new Utf8Parser(array());
+            }
+        ),
+
+        "<subparser>" => new ConcParser(
+            array(
+                new StringParser("("),
+                "<whitespace>",
+                "<lazyaltparser>",
+                new StringParser(")")
+            ),
+            function($left_parenthesis, $whitespace1, $lazyaltparser, $right_parenthesis) {
+                return $lazyaltparser;
+            }
+        ),
+
+        "<whitespace>"         => new  RegexParser("#^[ \t]*#"),
+        "<bareword>"           => new  RegexParser("#^[a-zA-Z_][a-zA-Z0-9_]*#")
+    ),
+    function($rules) {
+        $parsers = array();
+        foreach($rules as $rule) {
+            if(count($parsers) === 0) {
+                $top = $rule["name"];
+            }
+            $parsers[$rule["name"]] = $rule["lazyaltparser"];
+        }
+        return new Grammar($top, $parsers);
+    }
 );
 
 // if executing this file directly, run unit tests
 if(__FILE__ !== $_SERVER["SCRIPT_FILENAME"]) {
-	return;
+    return;
 }
 
 // parentheses inside your BNF *always* force an array to exist in the output
@@ -492,8 +492,8 @@ try { $grammar1->parse("]"); var_dump(false); } catch(ParseFailureException $e) 
 print("3A\n");
 $start = microtime(true);
 $grammar2 = $locoGrammar->parse(" 
-	unicode ::= 'a' '' b | 'grammar' '\\'' '\\\\' \"\\\"\"
-	b::=
+    unicode ::= 'a' '' b | 'grammar' '\\'' '\\\\' \"\\\"\"
+    b::=
 ");
 print("Parsing completed in ".(microtime(true)-$start)." seconds\n");
 
@@ -506,64 +506,64 @@ var_dump($result === array("grammar", "'", "\\", "\""));
 print("5\n");
 
 $bracketMatchGrammar = $locoGrammar->parse("
-	S          ::= expression *
-	expression ::= '<' S '>'
+    S          ::= expression *
+    expression ::= '<' S '>'
 ");
 
 foreach(
-	array(
-		"",
-		"<>",
-		"<><>",
-		"<<>>",
-		"<<<><>>><><<>>"
-	) as $string
+    array(
+        "",
+        "<>",
+        "<><>",
+        "<<>>",
+        "<<<><>>><><<>>"
+    ) as $string
 ) {
-	$bracketMatchGrammar->parse($string);
-	var_dump(true);
+    $bracketMatchGrammar->parse($string);
+    var_dump(true);
 }
 
 foreach(
-	array(
-		" ",
-		"<",
-		">",
-		"<><",
-		"<<>",
-		"<<<><>>><><><<<<>>>>>"
-	) as $string
+    array(
+        " ",
+        "<",
+        ">",
+        "<><",
+        "<<>",
+        "<<<><>>><><><<<<>>>>>"
+    ) as $string
 ) {
-	try {
-		$bracketMatchGrammar->parse($string);
-		var_dump(false);
-	} catch(ParseFailureException $e) {
-		var_dump(true);
-	}
+    try {
+        $bracketMatchGrammar->parse($string);
+        var_dump(false);
+    } catch(ParseFailureException $e) {
+        var_dump(true);
+    }
 }
 
 print("11\n");
 
 // Full rules for recognising JSON
 $jsonGrammar = $locoGrammar->parse("
-	topobject      ::= whitespace object
-	object         ::= '{' whitespace objectcontent '}' whitespace
-	objectcontent  ::= fullobject | ()
-	fullobject     ::= keyvalue (comma keyvalue)*
-	keyvalue       ::= string ':' whitespace value
-	array          ::= '[' whitespace arraycontent ']' whitespace
-	arraycontent   ::= fullarray | ()
-	fullarray      ::= value (comma value)*
-	value          ::= string | number | object | array | true | false | null
-	string         ::= '\"' stringcontent '\"' whitespace
-	stringcontent  ::= char *
-	char           ::= [^\"\\\\] | '\\\\' escapesequence
-	escapesequence ::= '\"' | '\\\\' | '/' | 'b' | 'f' | 'n' | 'r' | 't' | /u[0-9a-fA-F]{4}/
-	number         ::= /-?(0|[1-9][0-9]*)(\\.[0-9]+)?([eE][-+]?[0-9]+)?/ whitespace
-	true           ::= 'true' whitespace
-	false          ::= 'false' whitespace
-	null           ::= 'null' whitespace
-	comma          ::= ',' whitespace
-	whitespace     ::= /[ \n\r\t]*/
+    topobject      ::= whitespace object
+    object         ::= '{' whitespace objectcontent '}' whitespace
+    objectcontent  ::= fullobject | ()
+    fullobject     ::= keyvalue (comma keyvalue)*
+    keyvalue       ::= string ':' whitespace value
+    array          ::= '[' whitespace arraycontent ']' whitespace
+    arraycontent   ::= fullarray | ()
+    fullarray      ::= value (comma value)*
+    value          ::= string | number | object | array | true | false | null
+    string         ::= '\"' stringcontent '\"' whitespace
+    stringcontent  ::= char *
+    char           ::= [^\"\\\\] | '\\\\' escapesequence
+    escapesequence ::= '\"' | '\\\\' | '/' | 'b' | 'f' | 'n' | 'r' | 't' | /u[0-9a-fA-F]{4}/
+    number         ::= /-?(0|[1-9][0-9]*)(\\.[0-9]+)?([eE][-+]?[0-9]+)?/ whitespace
+    true           ::= 'true' whitespace
+    false          ::= 'false' whitespace
+    null           ::= 'null' whitespace
+    comma          ::= ',' whitespace
+    whitespace     ::= /[ \n\r\t]*/
 ");
 
 $start = microtime(true);
@@ -574,65 +574,65 @@ var_dump(true); // for successful parsing
 // failure modes
 print("12\n");
 foreach(
-	array(
-		"{ \"string ",        // incomplete string
-		"{ \"\\UAAAA\" ",     // capital U on unicode char
-		"{ \"\\u000i\" ",     // not enough hex digits on unicode char
-		"{ \"a\" : tru ",     // incomplete "true"
-		"{ \"a\" :  +9 ",     // leading +
-		"{ \"a\" :  9. ",     // missing decimal digits
-		"{ \"a\" :  0a8.52 ", // extraneous "a"
-		"{ \"a\" :  8E ",     // missing exponent
-		"{ \"a\" :  08 "      // Two numbers side by side.
-	) as $string
+    array(
+        "{ \"string ",        // incomplete string
+        "{ \"\\UAAAA\" ",     // capital U on unicode char
+        "{ \"\\u000i\" ",     // not enough hex digits on unicode char
+        "{ \"a\" : tru ",     // incomplete "true"
+        "{ \"a\" :  +9 ",     // leading +
+        "{ \"a\" :  9. ",     // missing decimal digits
+        "{ \"a\" :  0a8.52 ", // extraneous "a"
+        "{ \"a\" :  8E ",     // missing exponent
+        "{ \"a\" :  08 "      // Two numbers side by side.
+    ) as $string
 ) {
-	try {
-		$jsonGrammar->parse($string);
-		var_dump(false);
-	} catch(Exception $e) {
-		var_dump(true);
-	}
+    try {
+        $jsonGrammar->parse($string);
+        var_dump(false);
+    } catch(Exception $e) {
+        var_dump(true);
+    }
 }
 
 // Comments for qntm.org
 print("30\n");
 
 $simpleCommentGrammar = $locoGrammar->parse("
-	comment    ::= whitespace block*
-	block      ::= h5 whitespace | p whitespace
-	p          ::= '<p'      whitespace '>' text '</p'      whitespace '>'
-	h5         ::= '<h5'     whitespace '>' text '</h5'     whitespace '>'
-	strong     ::= '<strong' whitespace '>' text '</strong' whitespace '>'
-	em         ::= '<em'     whitespace '>' text '</em'     whitespace '>'
-	br         ::= '<br'     whitespace '/>'
-	text       ::= atom*
-	atom       ::= [^<>&] | '&' entity ';' | strong | em | br
-	entity     ::= 'gt' | 'lt' | 'amp'
-	whitespace ::= /[ \n\r\t]*/
+    comment    ::= whitespace block*
+    block      ::= h5 whitespace | p whitespace
+    p          ::= '<p'      whitespace '>' text '</p'      whitespace '>'
+    h5         ::= '<h5'     whitespace '>' text '</h5'     whitespace '>'
+    strong     ::= '<strong' whitespace '>' text '</strong' whitespace '>'
+    em         ::= '<em'     whitespace '>' text '</em'     whitespace '>'
+    br         ::= '<br'     whitespace '/>'
+    text       ::= atom*
+    atom       ::= [^<>&] | '&' entity ';' | strong | em | br
+    entity     ::= 'gt' | 'lt' | 'amp'
+    whitespace ::= /[ \n\r\t]*/
 ");
 
 $start = microtime(true);
 $string = $simpleCommentGrammar->parse("
-	<h5>  Title<br /><em\n><strong\n></strong>&amp;</em></h5>
-	\r\n\t
-	<p  >&lt;</p  >
+    <h5>  Title<br /><em\n><strong\n></strong>&amp;</em></h5>
+    \r\n\t
+    <p  >&lt;</p  >
 ");
 print("Parsing completed in ".(microtime(true)-$start)." seconds\n");
 
 foreach(
-	array(
-		"<h5 style=\"\">", // rogue "style" attribute
-		"&",               // unescaped AMPERSAND
-		"<",               // unescaped LESS_THAN
-		"salkhsfg>",       // unescaped GREATER_THAN
-		"</p",             // incomplete CLOSE_P
-		"<br"              // incomplete FULL_BR
-	) as $string
+    array(
+        "<h5 style=\"\">", // rogue "style" attribute
+        "&",               // unescaped AMPERSAND
+        "<",               // unescaped LESS_THAN
+        "salkhsfg>",       // unescaped GREATER_THAN
+        "</p",             // incomplete CLOSE_P
+        "<br"              // incomplete FULL_BR
+    ) as $string
 ) {
-	try {
-		$simpleCommentGrammar->parse($string);
-		var_dump(false);
-	} catch(Exception $e) {
-		var_dump(true);
-	}
+    try {
+        $simpleCommentGrammar->parse($string);
+        var_dump(false);
+    } catch(Exception $e) {
+        var_dump(true);
+    }
 }
