@@ -26,7 +26,7 @@ $wirthGrammar = new Grammar(
                 new StringParser("."),
                 "whitespace"
             ),
-            function($space1, $identifier, $equals, $space2, $expression, $dot, $space3) {
+            function ($space1, $identifier, $equals, $space2, $expression, $dot, $space3) {
                 return array("identifier" => $identifier, "expression" => $expression);
             }
         ),
@@ -40,13 +40,13 @@ $wirthGrammar = new Grammar(
                             "whitespace",
                             "TERM"
                         ),
-                        function($pipe, $space, $term) {
+                        function ($pipe, $space, $term) {
                             return $term;
                         }
                     )
                 )
             ),
-            function($term, $terms) {
+            function ($term, $terms) {
                 array_unshift($terms, $term);
                 return new LazyAltParser($terms);
             }
@@ -55,7 +55,7 @@ $wirthGrammar = new Grammar(
             "FACTOR",
             1,
             null,
-            function() {
+            function () {
                 return new ConcParser(func_get_args());
             }
         ),
@@ -71,7 +71,7 @@ $wirthGrammar = new Grammar(
                         new StringParser("]"),
                         "whitespace"
                     ),
-                    function($bracket1, $space1, $expression, $bracket2, $space2) {
+                    function ($bracket1, $space1, $expression, $bracket2, $space2) {
                         return new GreedyMultiParser($expression, 0, 1);
                     }
                 ),
@@ -83,7 +83,7 @@ $wirthGrammar = new Grammar(
                         new StringParser(")"),
                         "whitespace"
                     ),
-                    function($paren1, $space1, $expression, $paren2, $space2) {
+                    function ($paren1, $space1, $expression, $paren2, $space2) {
                         return $expression;
                     }
                 ),
@@ -95,7 +95,7 @@ $wirthGrammar = new Grammar(
                         new StringParser("}"),
                         "whitespace"
                     ),
-                    function($brace1, $space1, $expression, $brace2, $space2) {
+                    function ($brace1, $space1, $expression, $brace2, $space2) {
                         return new GreedyStarParser($expression);
                     }
                 )
@@ -107,13 +107,13 @@ $wirthGrammar = new Grammar(
                     "letter",
                     1,
                     null,
-                    function() {
+                    function () {
                         return implode("", func_get_args());
                     }
                 ),
                 "whitespace",
             ),
-            function($letters, $whitespace) {
+            function ($letters, $whitespace) {
                 return $letters;
             }
         ),
@@ -124,14 +124,14 @@ $wirthGrammar = new Grammar(
                     "character",
                     1,
                     null,
-                    function() {
+                    function () {
                         return implode("", func_get_args());
                     }
                 ),
                 new StringParser("\""),
                 "whitespace"
             ),
-            function($quote1, $chars, $quote2, $whitespace) {
+            function ($quote1, $chars, $quote2, $whitespace) {
                 return new StringParser($chars);
             }
         ),
@@ -139,8 +139,8 @@ $wirthGrammar = new Grammar(
         "letter" => new RegexParser("#^[a-zA-Z]#"),
         "character" => new RegexParser(
             "#^([^\"]|\"\")#",
-            function($match0) {
-                if($match0 === "\"\"") {
+            function ($match0) {
+                if ($match0 === "\"\"") {
                     return "\"";
                 }
                 return $match0;
@@ -148,15 +148,15 @@ $wirthGrammar = new Grammar(
         ),
         "whitespace" => new RegexParser("#^[ \n\r\t]*#")
     ),
-    function($syntax) {
+    function ($syntax) {
         $parsers = array();
-        foreach($syntax as $production) {
-            if(count($parsers) === 0) {
+        foreach ($syntax as $production) {
+            if (count($parsers) === 0) {
                 $top = $production["identifier"];
             }
             $parsers[$production["identifier"]] = $production["expression"];
         }
-        if(count($parsers) === 0) {
+        if (count($parsers) === 0) {
             throw new Exception("No rules.");
         }
         return new Grammar($top, $parsers);
@@ -164,7 +164,7 @@ $wirthGrammar = new Grammar(
 );
 
 // if executing this file directly, run unit tests
-if(__FILE__ !== $_SERVER["SCRIPT_FILENAME"]) {
+if (__FILE__ !== $_SERVER["SCRIPT_FILENAME"]) {
     return;
 }
 

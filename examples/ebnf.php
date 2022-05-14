@@ -20,7 +20,7 @@ $ebnfGrammar = new Grammar(
     array(
         "<syntax>" => new ConcParser(
             array("<space>", "<rules>"),
-            function($space, $rules) {
+            function ($space, $rules) {
                 return $rules;
             }
         ),
@@ -29,7 +29,7 @@ $ebnfGrammar = new Grammar(
 
         "<rule>" => new ConcParser(
             array("<bareword>", "<space>", new StringParser("="), "<space>", "<alt>", new StringParser(";"), "<space>"),
-            function($bareword, $space1, $equals, $space2, $alt, $semicolon, $space3) {
+            function ($bareword, $space1, $equals, $space2, $alt, $semicolon, $space3) {
                 return array(
                     "rule-name"  => $bareword,
                     "expression" => $alt
@@ -39,7 +39,7 @@ $ebnfGrammar = new Grammar(
 
         "<alt>" => new ConcParser(
             array("<conc>", "<pipeconclist>"),
-            function($conc, $pipeconclist) {
+            function ($conc, $pipeconclist) {
                 array_unshift($pipeconclist, $conc);
                 return new LazyAltParser($pipeconclist);
             }
@@ -49,21 +49,21 @@ $ebnfGrammar = new Grammar(
 
         "<pipeconc>" => new ConcParser(
             array(new StringParser("|"), "<space>", "<conc>"),
-            function($pipe, $space, $conc) {
+            function ($pipe, $space, $conc) {
                 return $conc;
             }
         ),
 
         "<conc>" => new ConcParser(
             array("<term>", "<commatermlist>"),
-            function($term, $commatermlist) {
+            function ($term, $commatermlist) {
                 array_unshift($commatermlist, $term);
 
                 // get array key numbers where multiparsers are located
                 // in reverse order so that our splicing doesn't modify the array
                 $multiparsers = array();
-                foreach($commatermlist as $k => $internal) {
-                    if(is_a($internal, "GreedyMultiParser")) {
+                foreach ($commatermlist as $k => $internal) {
+                    if (is_a($internal, "GreedyMultiParser")) {
                         array_unshift($multiparsers, $k);
                     }
                 }
@@ -73,9 +73,9 @@ $ebnfGrammar = new Grammar(
                 // internal sub-array of their own
                 return new ConcParser(
                     $commatermlist,
-                    function() use ($multiparsers) {
+                    function () use ($multiparsers) {
                         $args = func_get_args();
-                        foreach($multiparsers as $k) {
+                        foreach ($multiparsers as $k) {
                             array_splice($args, $k, 1, $args[$k]);
                         }
                         return $args;
@@ -88,7 +88,7 @@ $ebnfGrammar = new Grammar(
 
         "<commaterm>" => new ConcParser(
             array(new StringParser(","), "<space>", "<term>"),
-            function($comma, $space, $term) {
+            function ($comma, $space, $term) {
                 return $term;
             }
         ),
@@ -101,13 +101,13 @@ $ebnfGrammar = new Grammar(
             array(
                 new RegexParser(
                     "#^([a-z][a-z ]*[a-z]|[a-z])#",
-                    function($match0) {
+                    function ($match0) {
                         return $match0;
                     }
                 ),
                 "<space>"
             ),
-            function($bareword, $space) {
+            function ($bareword, $space) {
                 return $bareword;
             }
         ),
@@ -116,8 +116,8 @@ $ebnfGrammar = new Grammar(
             array(
                 new RegexParser(
                     "#^'([^']*)'#",
-                    function($match0, $match1) {
-                        if($match1 === "") {
+                    function ($match0, $match1) {
+                        if ($match1 === "") {
                             return new EmptyParser();
                         }
                         return new StringParser($match1);
@@ -125,7 +125,7 @@ $ebnfGrammar = new Grammar(
                 ),
                 "<space>"
             ),
-            function($string, $space) {
+            function ($string, $space) {
                 return $string;
             }
         ),
@@ -134,8 +134,8 @@ $ebnfGrammar = new Grammar(
             array(
                 new RegexParser(
                     '#^"([^"]*)"#',
-                    function($match0, $match1) {
-                        if($match1 === "") {
+                    function ($match0, $match1) {
+                        if ($match1 === "") {
                             return new EmptyParser();
                         }
                         return new StringParser($match1);
@@ -143,7 +143,7 @@ $ebnfGrammar = new Grammar(
                 ),
                 "<space>"
             ),
-            function($string, $space) {
+            function ($string, $space) {
                 return $string;
             }
         ),
@@ -156,7 +156,7 @@ $ebnfGrammar = new Grammar(
                 new StringParser(")"),
                 "<space>"
             ),
-            function($left_paren, $space1, $alt, $right_paren, $space2) {
+            function ($left_paren, $space1, $alt, $right_paren, $space2) {
                 return $alt;
             }
         ),
@@ -169,7 +169,7 @@ $ebnfGrammar = new Grammar(
                 new StringParser("}"),
                 "<space>"
             ),
-            function($left_brace, $space1, $alt, $right_brace, $space2) {
+            function ($left_brace, $space1, $alt, $right_brace, $space2) {
                 return new GreedyStarParser($alt);
             }
         ),
@@ -182,7 +182,7 @@ $ebnfGrammar = new Grammar(
                 new StringParser("]"),
                 "<space>"
             ),
-            function($left_bracket, $space1, $alt, $right_bracket, $space2) {
+            function ($left_bracket, $space1, $alt, $right_bracket, $space2) {
                 return new GreedyMultiParser($alt, 0, 1);
             }
         ),
@@ -196,15 +196,15 @@ $ebnfGrammar = new Grammar(
         "<whitespace>" => new RegexParser("#^[ \t\r\n]+#"),
         "<comment>" => new RegexParser("#^(\(\* [^*]* \*\)|\(\* \*\)|\(\*\*\))#")
     ),
-    function($syntax) {
+    function ($syntax) {
         $parsers = array();
-        foreach($syntax as $rule) {
-            if(count($parsers) === 0) {
+        foreach ($syntax as $rule) {
+            if (count($parsers) === 0) {
                 $top = $rule["rule-name"];
             }
             $parsers[$rule["rule-name"]] = $rule["expression"];
         }
-        if(count($parsers) === 0) {
+        if (count($parsers) === 0) {
             throw new Exception("No rules.");
         }
         return new Grammar($top, $parsers);
@@ -212,7 +212,7 @@ $ebnfGrammar = new Grammar(
 );
 
 // if executing this file directly, run unit tests
-if(__FILE__ !== $_SERVER["SCRIPT_FILENAME"]) {
+if (__FILE__ !== $_SERVER["SCRIPT_FILENAME"]) {
     return;
 }
 
@@ -223,7 +223,12 @@ var_dump(true);
 // Should raise a ParseFailureException before trying to instantiate a Grammar
 // with no rules and raising a GrammarException
 $string = "a = 'PROGRAM ;";
-try { $ebnfGrammar->parse($string); var_dump(false); } catch(ParseFailureException $e) { var_dump(true); }
+try {
+    $ebnfGrammar->parse($string);
+    var_dump(false);
+} catch (ParseFailureException $e) {
+    var_dump(true);
+}
 
 // Full rule set
 $string = "

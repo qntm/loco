@@ -198,6 +198,22 @@ $p->parse("<p>Your text here &amp; here &amp; &lt;here&gt;</p>");
 
 Loco also comes with [a collection of public domain examples](examples).
 
+## Development
+
+Assuming you have PHP 7.4 or greater installed, and Composer, run:
+
+```sh
+composer install
+```
+
+to install all dependencies, then
+
+```sh
+composer test
+```
+
+to run the test scripts, including linting.
+
 ## About Loco
 
 I created Loco because I wanted to let people use XHTML comments on my website, and I wanted to be able validate that XHTML in a flexible way, starting with a narrow subset of XHTML and adding support for more tags over time. I believed that writing a parsing library would be more effective and educational than hand-writing (and then constantly hand-rewriting) a parser.

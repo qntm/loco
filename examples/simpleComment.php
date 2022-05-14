@@ -13,30 +13,42 @@ $simpleCommentGrammar = new Grammar(
     array(
         "<comment>" => new GreedyStarParser(
             "<blockorwhitespace>",
-            function() { return implode("", func_get_args()); }
+            function () {
+                return implode("", func_get_args());
+            }
         ),
         "<blockorwhitespace>" => new LazyAltParser(
             array("<h5>", "<p>", "WHITESPACE")
         ),
         "<p>" => new ConcParser(
             array("OPEN_P", "<text>", "CLOSE_P"),
-            function($open_p, $text, $close_p) { return $open_p.$text.$close_p; }
+            function ($open_p, $text, $close_p) {
+                return $open_p.$text.$close_p;
+            }
         ),
         "<h5>" => new ConcParser(
             array("OPEN_H5", "<text>", "CLOSE_H5"),
-            function($open_h5, $text, $close_h5) { return $open_h5.$text.$close_h5; }
+            function ($open_h5, $text, $close_h5) {
+                return $open_h5.$text.$close_h5;
+            }
         ),
         "<strong>" => new ConcParser(
             array("OPEN_STRONG", "<text>", "CLOSE_STRONG"),
-            function($open_strong, $text, $close_strong) { return $open_strong.$text.$close_strong; }
+            function ($open_strong, $text, $close_strong) {
+                return $open_strong.$text.$close_strong;
+            }
         ),
         "<em>" => new ConcParser(
             array("OPEN_EM", "<text>", "CLOSE_EM"),
-            function($open_em, $text, $close_em) { return $open_em.$text.$close_em; }
+            function ($open_em, $text, $close_em) {
+                return $open_em.$text.$close_em;
+            }
         ),
         "<text>" => new GreedyStarParser(
             "<atom>",
-            function() { return implode("", func_get_args()); }
+            function () {
+                return implode("", func_get_args());
+            }
         ),
         "<atom>" => new LazyAltParser(
             array("<char>", "<strong>", "<em>", "FULL_BR")
@@ -66,7 +78,7 @@ $simpleCommentGrammar = new Grammar(
 );
 
 // if executing this file directly, run unit tests
-if(__FILE__ !== $_SERVER["SCRIPT_FILENAME"]) {
+if (__FILE__ !== $_SERVER["SCRIPT_FILENAME"]) {
     return;
 }
 
@@ -75,20 +87,18 @@ $string = $simpleCommentGrammar->parse("<h5>  Title<br /><em\n><strong\n></stron
 print("Parsing completed in ".(microtime(true)-$start)." seconds\n");
 var_dump($string === "<h5>  Title<br /><em\n><strong\n></strong>&amp;</em></h5>   \r\n\t <p  >&lt;</p  >");
 
-foreach(
-    array(
-        "<h5 style=\"\">", // rogue "style" attribute
-        "&",               // unescaped AMPERSAND
-        "<",               // unescaped LESS_THAN
-        "salkhsfg>",       // unescaped GREATER_THAN
-        "</p",             // incomplete CLOSE_P
-        "<br"              // incomplete FULL_BR
-    ) as $string
-) {
+foreach (array(
+    "<h5 style=\"\">", // rogue "style" attribute
+    "&",               // unescaped AMPERSAND
+    "<",               // unescaped LESS_THAN
+    "salkhsfg>",       // unescaped GREATER_THAN
+    "</p",             // incomplete CLOSE_P
+    "<br"              // incomplete FULL_BR
+) as $string) {
     try {
         $simpleCommentGrammar->parse($string);
         var_dump(false);
-    } catch(Exception $e) {
+    } catch (Exception $e) {
         var_dump(true);
     }
 }

@@ -20,19 +20,20 @@ $bnfGrammar = new Grammar(
                 "<rules>",
                 "OPT-WHITESPACE"
             ),
-            function($rules, $whitespace) { return $rules; }
+            function ($rules, $whitespace) {
+                return $rules;
+            }
         ),
 
         "<rules>" => new GreedyMultiParser(
             "<ruleoremptyline>",
             1,
             null,
-            function() {
+            function () {
                 $rules = array();
-                foreach(func_get_args() as $rule) {
-
+                foreach (func_get_args() as $rule) {
                     // blank line
-                    if($rule === null) {
+                    if ($rule === null) {
                         continue;
                     }
 
@@ -48,7 +49,7 @@ $bnfGrammar = new Grammar(
 
         "<emptyline>" => new ConcParser(
             array("OPT-WHITESPACE", "EOL"),
-            function($whitespace, $eol) {
+            function ($whitespace, $eol) {
                 return null;
             }
         ),
@@ -63,7 +64,7 @@ $bnfGrammar = new Grammar(
                 "<expression>",
                 "EOL"
             ),
-            function(
+            function (
                 $whitespace1,
                 $rule_name,
                 $whitespace2,
@@ -84,7 +85,7 @@ $bnfGrammar = new Grammar(
                 "<list>",
                 "<pipelists>"
             ),
-            function($list, $pipelists) {
+            function ($list, $pipelists) {
                 array_unshift($pipelists, $list);
                 return new LazyAltParser($pipelists);
             }
@@ -98,7 +99,7 @@ $bnfGrammar = new Grammar(
                 "OPT-WHITESPACE",
                 "<list>"
             ),
-            function($pipe, $whitespace, $list) {
+            function ($pipe, $whitespace, $list) {
                 return $list;
             }
         ),
@@ -107,14 +108,14 @@ $bnfGrammar = new Grammar(
             "<term>",
             1,
             null,
-            function() {
+            function () {
                 return new ConcParser(func_get_args());
             }
         ),
 
         "<term>" => new ConcParser(
             array("TERM", "OPT-WHITESPACE"),
-            function($term, $whitespace) {
+            function ($term, $whitespace) {
                 return $term;
             }
         ),
@@ -128,12 +129,18 @@ $bnfGrammar = new Grammar(
 
         "LITERAL" => new LazyAltParser(
             array(
-                new RegexParser('#^"([^"]*)"#', function($match0, $match1) { return $match1; }),
-                new RegexParser("#^'([^']*)'#", function($match0, $match1) { return $match1; })
+                new RegexParser('#^"([^"]*)"#', function ($match0, $match1) {
+                    return $match1;
+                }),
+                new RegexParser("#^'([^']*)'#", function ($match0, $match1) {
+                    return $match1;
+                })
             ),
-            function($text) {
-                if($text == "") {
-                    return new EmptyParser(function() { return ""; });
+            function ($text) {
+                if ($text == "") {
+                    return new EmptyParser(function () {
+                        return "";
+                    });
                 }
                 return new StringParser($text);
             }
@@ -150,16 +157,15 @@ $bnfGrammar = new Grammar(
             )
         )
     ),
-    function($syntax) {
+    function ($syntax) {
         $parsers = array();
-        foreach($syntax as $rule) {
-
-            if(count($parsers) === 0) {
+        foreach ($syntax as $rule) {
+            if (count($parsers) === 0) {
                 $top = $rule["rule-name"];
             }
             $parsers[$rule["rule-name"]] = $rule["expression"];
         }
-        if(count($parsers) === 0) {
+        if (count($parsers) === 0) {
             throw new Exception("No rules.");
         }
         return new Grammar($top, $parsers);
@@ -167,7 +173,7 @@ $bnfGrammar = new Grammar(
 );
 
 // if executing this file directly, run unit tests
-if(__FILE__ !== $_SERVER["SCRIPT_FILENAME"]) {
+if (__FILE__ !== $_SERVER["SCRIPT_FILENAME"]) {
     return;
 }
 
@@ -202,18 +208,18 @@ $grammar2->parse("Steve MacLaurin \n173 Acacia Avenue 7A\nStevenage, KY 33445\n"
 print("Parsing completed in ".(microtime(true)-$start)." seconds\n");
 
 $string = "
-    <syntax>         ::= <rule> | <rule> <syntax>
-    <rule>           ::= <opt-whitespace> \"<\" <rule-name> \">\" <opt-whitespace> \"::=\" <opt-whitespace> <expression> <line-end>
-    <opt-whitespace> ::= \" \" <opt-whitespace> | \"\"
-    <expression>     ::= <list> | <list> \"|\" <expression>
-    <line-end>       ::= <opt-whitespace> <EOL> <line-end> | <opt-whitespace> <EOL>
-    <list>           ::= <term> | <term> <opt-whitespace> <list>
-    <term>           ::= <literal> | \"<\" <rule-name> \">\"
-    <literal>        ::= '\"' <text> '\"' | \"'\" <text> \"'\"
+    <syntax>     ::= <rule> | <rule> <syntax>
+    <rule>       ::= <opt-ws> \"<\" <rule-name> \">\" <opt-ws> \"::=\" <opt-ws> <expression> <line-end>
+    <opt-ws>     ::= \" \" <opt-ws> | \"\"
+    <expression> ::= <list> | <list> \"|\" <expression>
+    <line-end>   ::= <opt-ws> <EOL> <line-end> | <opt-ws> <EOL>
+    <list>       ::= <term> | <term> <opt-ws> <list>
+    <term>       ::= <literal> | \"<\" <rule-name> \">\"
+    <literal>    ::= '\"' <text> '\"' | \"'\" <text> \"'\"
 
-    <rule-name>      ::= 'a'
-    <EOL>            ::= '\n'
-    <text>           ::= 'b'
+    <rule-name>  ::= 'a'
+    <EOL>        ::= '\n'
+    <text>       ::= 'b'
 ";
 
 $start = microtime(true);
@@ -226,4 +232,8 @@ print("Parsing completed in ".(microtime(true)-$start)." seconds\n");
 
 // Should raise a ParseFailureException before trying to instantiate a Grammar
 $string = " <incomplete ::=";
-try { $bnfGrammar->parse($string); var_dump(false); } catch(ParseFailureException $e) { }
+try {
+    $bnfGrammar->parse($string);
+    var_dump(false);
+} catch (ParseFailureException $e) {
+}

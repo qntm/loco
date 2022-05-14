@@ -16,17 +16,17 @@ $locoGrammar = new Grammar(
     array(
         "<grammar>" => new ConcParser(
             array("<whitespace>", "<rules>"),
-            function($whitespace, $rules) {
+            function ($whitespace, $rules) {
                 return $rules;
             }
         ),
 
         "<rules>" => new GreedyStarParser(
             "<ruleorblankline>",
-            function() {
+            function () {
                 $rules = array();
-                foreach(func_get_args() as $ruleorblankline) {
-                    if($ruleorblankline === null) {
+                foreach (func_get_args() as $ruleorblankline) {
+                    if ($ruleorblankline === null) {
                         continue;
                     }
                     $rules[] = $ruleorblankline;
@@ -44,7 +44,7 @@ $locoGrammar = new Grammar(
                 new RegexParser("#^\r?\n#"),
                 "<whitespace>"
             ),
-            function() {
+            function () {
                 return null;
             }
         ),
@@ -57,7 +57,7 @@ $locoGrammar = new Grammar(
                 "<whitespace>",
                 "<lazyaltparser>"
             ),
-            function($bareword, $whitespace1, $equals, $whitespace2, $lazyaltparser) {
+            function ($bareword, $whitespace1, $equals, $whitespace2, $lazyaltparser) {
                 return array(
                     "name" => $bareword,
                     "lazyaltparser" => $lazyaltparser
@@ -67,7 +67,7 @@ $locoGrammar = new Grammar(
 
         "<lazyaltparser>" => new ConcParser(
             array("<concparser>", "<pipeconcparserlist>"),
-            function($concparser, $pipeconcparserlist) {
+            function ($concparser, $pipeconcparserlist) {
                 array_unshift($pipeconcparserlist, $concparser);
 
                 // make a basic lazyaltparser which returns whatever.
@@ -87,17 +87,19 @@ $locoGrammar = new Grammar(
                 "<whitespace>",
                 "<concparser>"
             ),
-            function($pipe, $whitespace, $concparser) { return $concparser; }
+            function ($pipe, $whitespace, $concparser) {
+                return $concparser;
+            }
         ),
 
         "<concparser>" => new GreedyStarParser(
             "<bnfmultiplication>",
-            function() {
+            function () {
                 // get array key numbers where multiparsers are located
                 // in reverse order so that our splicing doesn't modify the array
                 $multiparsers = array();
-                foreach(func_get_args() as $k => $internal) {
-                    if(is_a($internal, "GreedyMultiParser")) {
+                foreach (func_get_args() as $k => $internal) {
+                    if (is_a($internal, "GreedyMultiParser")) {
                         array_unshift($multiparsers, $k);
                     }
                 }
@@ -107,9 +109,9 @@ $locoGrammar = new Grammar(
                 // internal sub-array of their own
                 return new ConcParser(
                     func_get_args(),
-                    function() use ($multiparsers) {
+                    function () use ($multiparsers) {
                         $args = func_get_args();
-                        foreach($multiparsers as $k) {
+                        foreach ($multiparsers as $k) {
                             array_splice($args, $k, 1, $args[$k]);
                         }
                         return $args;
@@ -120,9 +122,8 @@ $locoGrammar = new Grammar(
 
         "<bnfmultiplication>" => new ConcParser(
             array("<bnfmultiplicand>", "<whitespace>", "<bnfmultiplier>", "<whitespace>"),
-            function($bnfmultiplicand, $whitespace1, $bnfmultiplier, $whitespace2) {
-
-                if(is_array($bnfmultiplier)) {
+            function ($bnfmultiplicand, $whitespace1, $bnfmultiplier, $whitespace2) {
+                if (is_array($bnfmultiplier)) {
                     return new GreedyMultiParser(
                         $bnfmultiplicand,
                         $bnfmultiplier["lower"],
@@ -153,17 +154,23 @@ $locoGrammar = new Grammar(
 
         "<asterisk>" => new StringParser(
             "*",
-            function() { return array("lower" => 0, "upper" => null); }
+            function () {
+                return array("lower" => 0, "upper" => null);
+            }
         ),
 
         "<plus>" => new StringParser(
             "+",
-            function() { return array("lower" => 1, "upper" => null); }
+            function () {
+                return array("lower" => 1, "upper" => null);
+            }
         ),
 
         "<questionmark>" => new StringParser(
             "?",
-            function() { return array("lower" => 0, "upper" => 1); }
+            function () {
+                return array("lower" => 0, "upper" => 1);
+            }
         ),
 
         "<emptymultiplier>" => new EmptyParser(),
@@ -175,8 +182,8 @@ $locoGrammar = new Grammar(
                 "<dqstring>",
                 new StringParser("\"")
             ),
-            function($quote1, $string, $quote2) {
-                if($string === "") {
+            function ($quote1, $string, $quote2) {
+                if ($string === "") {
                     return new EmptyParser();
                 }
                 return new StringParser($string);
@@ -189,8 +196,8 @@ $locoGrammar = new Grammar(
                 "<sqstring>",
                 new StringParser("'")
             ),
-            function($apostrophe1, $string, $apostrophe2) {
-                if($string === "") {
+            function ($apostrophe1, $string, $apostrophe2) {
+                if ($string === "") {
                     return new EmptyParser();
                 }
                 return new StringParser($string);
@@ -199,27 +206,39 @@ $locoGrammar = new Grammar(
 
         "<dqstring>" => new GreedyStarParser(
             "<dqstrchar>",
-            function() { return implode("", func_get_args()); }
+            function () {
+                return implode("", func_get_args());
+            }
         ),
 
         "<sqstring>" => new GreedyStarParser(
             "<sqstrchar>",
-            function() { return implode("", func_get_args()); }
+            function () {
+                return implode("", func_get_args());
+            }
         ),
 
         "<dqstrchar>" => new LazyAltParser(
             array(
                 new Utf8Parser(array("\\", "\"")),
-                new StringParser("\\\\", function($string) { return "\\"; }),
-                new StringParser('\\"', function($string) { return '"'; })
+                new StringParser("\\\\", function ($string) {
+                    return "\\";
+                }),
+                new StringParser('\\"', function ($string) {
+                    return '"';
+                })
             )
         ),
 
         "<sqstrchar>" => new LazyAltParser(
             array(
                 new Utf8Parser(array("\\", "'")),
-                new StringParser("\\\\", function($string) { return "\\"; }),
-                new StringParser("\\'" , function($string) { return "'"; })
+                new StringParser("\\\\", function ($string) {
+                    return "\\";
+                }),
+                new StringParser("\\'", function ($string) {
+                    return "'";
+                })
             )
         ),
 
@@ -230,8 +249,8 @@ $locoGrammar = new Grammar(
                 "<regex>",
                 new StringParser("/")
             ),
-            function($slash1, $regex, $slash2) {
-                if($regex === "") {
+            function ($slash1, $regex, $slash2) {
+                if ($regex === "") {
                     return new EmptyParser();
                 }
 
@@ -245,7 +264,9 @@ $locoGrammar = new Grammar(
 
         "<regex>" => new GreedyStarParser(
             "<rechar>",
-            function() { return implode("", func_get_args()); }
+            function () {
+                return implode("", func_get_args());
+            }
         ),
 
         // Regular expression contains: Any single character that is not a slash or backslash...
@@ -258,7 +279,7 @@ $locoGrammar = new Grammar(
                         new StringParser("\\"),
                         new Utf8Parser()
                     ),
-                    function($backslash, $char) {
+                    function ($backslash, $char) {
                         return $backslash.$char;
                     }
                 )
@@ -271,7 +292,7 @@ $locoGrammar = new Grammar(
                 "<exceptions>",
                 new StringParser("]")
             ),
-            function($left_bracket_caret, $exceptions, $right_bracket) {
+            function ($left_bracket_caret, $exceptions, $right_bracket) {
                 return new Utf8Parser($exceptions);
             }
         ),
@@ -281,14 +302,18 @@ $locoGrammar = new Grammar(
         "<exceptionchar>" => new LazyAltParser(
             array(
                 new Utf8Parser(array("\\", "]")),
-                new StringParser("\\\\", function($string) { return "\\"; }),
-                new StringParser("\\]" , function($string) { return "]"; })
+                new StringParser("\\\\", function ($string) {
+                    return "\\";
+                }),
+                new StringParser("\\]", function ($string) {
+                    return "]";
+                })
             )
         ),
 
         "<utf8parser>" => new StringParser(
             ".",
-            function() {
+            function () {
                 return new Utf8Parser(array());
             }
         ),
@@ -300,7 +325,7 @@ $locoGrammar = new Grammar(
                 "<lazyaltparser>",
                 new StringParser(")")
             ),
-            function($left_parenthesis, $whitespace1, $lazyaltparser, $right_parenthesis) {
+            function ($left_parenthesis, $whitespace1, $lazyaltparser, $right_parenthesis) {
                 return $lazyaltparser;
             }
         ),
@@ -308,10 +333,10 @@ $locoGrammar = new Grammar(
         "<whitespace>"         => new  RegexParser("#^[ \t]*#"),
         "<bareword>"           => new  RegexParser("#^[a-zA-Z_][a-zA-Z0-9_]*#")
     ),
-    function($rules) {
+    function ($rules) {
         $parsers = array();
-        foreach($rules as $rule) {
-            if(count($parsers) === 0) {
+        foreach ($rules as $rule) {
+            if (count($parsers) === 0) {
                 $top = $rule["name"];
             }
             $parsers[$rule["name"]] = $rule["lazyaltparser"];
@@ -321,12 +346,13 @@ $locoGrammar = new Grammar(
 );
 
 // if executing this file directly, run unit tests
-if(__FILE__ !== $_SERVER["SCRIPT_FILENAME"]) {
+if (__FILE__ !== $_SERVER["SCRIPT_FILENAME"]) {
     return;
 }
 
 // parentheses inside your BNF *always* force an array to exist in the output
-// *, +, ? and {m,n} are not disguised parentheses; they expand into the main expression
+// *, +, ? and {m,n} are not disguised parentheses;
+    they expand into the main expression
 // in the absence of a function to call, an array is is built instead
 
 print("0A\n");
@@ -433,10 +459,30 @@ var_dump($grammar1->parse("a") === array("a"));
 var_dump($grammar4->parse("a") === array("a"));
 var_dump($grammar2->parse("a") === array(array("a")));
 var_dump($grammar3->parse("a") === array(array("a")));
-try { $grammar1->parse(""); var_dump(false); } catch(ParseFailureException $e) { var_dump(true); }
-try { $grammar4->parse(""); var_dump(false); } catch(ParseFailureException $e) { var_dump(true); }
-try { $grammar2->parse(""); var_dump(false); } catch(ParseFailureException $e) { var_dump(true); }
-try { $grammar3->parse(""); var_dump(false); } catch(ParseFailureException $e) { var_dump(true); }
+try {
+    $grammar1->parse("");
+    var_dump(false);
+} catch (ParseFailureException $e) {
+    var_dump(true);
+}
+try {
+    $grammar4->parse("");
+    var_dump(false);
+} catch (ParseFailureException $e) {
+    var_dump(true);
+}
+try {
+    $grammar2->parse("");
+    var_dump(false);
+} catch (ParseFailureException $e) {
+    var_dump(true);
+}
+try {
+    $grammar3->parse("");
+    var_dump(false);
+} catch (ParseFailureException $e) {
+    var_dump(true);
+}
 
 // Regexes and Leaning Toothpick Syndrome
 print("2Aa\n");
@@ -444,7 +490,12 @@ $grammar1 = $locoGrammar->parse(" S ::= /(ab)*/ ");
 var_dump($grammar1->parse("ababab") === array("ababab"));
 $grammar = $locoGrammar->parse(" number ::= /a\\.b/ ");
 var_dump($grammar->parse("a.b") === array("a.b"));
-try { $grammar1->parse("aXb"); var_dump(false); } catch(ParseFailureException $e) { var_dump(true); }
+try {
+    $grammar1->parse("aXb");
+    var_dump(false);
+} catch (ParseFailureException $e) {
+    var_dump(true);
+}
 
 print("2Ab\n");
 
@@ -459,22 +510,67 @@ var_dump($grammar1->parse("\\") === array("\\"));
 // UTF-8 dot (equivalent to [^], if you think about it!)
 print("2Ba\n");
 $grammar1 = $locoGrammar->parse(" S ::= . ");
-try { $grammar1->parse(""); var_dump(false); } catch(ParseFailureException $e) { var_dump(true); }
-var_dump($grammar1->parse("\x41"            ) === array("\x41"            )); # 1-byte character "A"
-var_dump($grammar1->parse("\xC2\xAF"        ) === array("\xC2\xAF"        )); # 2-byte character "�"
-var_dump($grammar1->parse("\xE2\x99\xA5"    ) === array("\xE2\x99\xA5"    )); # 3-byte character "?"
+try {
+    $grammar1->parse("");
+    var_dump(false);
+} catch (ParseFailureException $e) {
+    var_dump(true);
+}
+var_dump($grammar1->parse("\x41") === array("\x41")); # 1-byte character "A"
+var_dump($grammar1->parse("\xC2\xAF") === array("\xC2\xAF")); # 2-byte character "�"
+var_dump($grammar1->parse("\xE2\x99\xA5") === array("\xE2\x99\xA5")); # 3-byte character "?"
 var_dump($grammar1->parse("\xF1\x8B\x81\x82") === array("\xF1\x8B\x81\x82")); # 4-byte character "??"
-var_dump($grammar1->parse("\xEF\xBB\xBF"    ) === array("\xEF\xBB\xBF"    )); # "byte order mark" 11101111 10111011 10111111 (U+FEFF)
+var_dump($grammar1->parse("\xEF\xBB\xBF") === array("\xEF\xBB\xBF")); # "byte order mark" 11101111 10111011 10111111 (U+FEFF)
 var_dump($grammar1->parse("\xF0\x90\x80\x80") === array("\xF0\x90\x80\x80")); # 4-byte character
 var_dump($grammar1->parse("\xF0\xA0\x80\x80") === array("\xF0\xA0\x80\x80")); # 4-byte character
-try { $grammar1->parse("\xF4\x90\x80\x80"); var_dump(false); } catch(ParseFailureException $e) { var_dump(true); } # code point U+110000, out of range (max is U+10FFFF)
-try { $grammar1->parse("\xC0\xA6"        ); var_dump(false); } catch(ParseFailureException $e) { var_dump(true); } # overlong encoding (code point is U+26; should be 1 byte, "\x26")
-try { $grammar1->parse("\xC3\xFF"        ); var_dump(false); } catch(ParseFailureException $e) { var_dump(true); } # illegal continuation byte
-try { $grammar1->parse("\xFF"            ); var_dump(false); } catch(ParseFailureException $e) { var_dump(true); } # illegal leading byte
-try { $grammar1->parse("\xC2"            ); var_dump(false); } catch(ParseFailureException $e) { var_dump(true); } # mid-character termination
-try { $grammar1->parse("\x00"            ); var_dump(false); } catch(ParseFailureException $e) { var_dump(true); } # null
-try { $grammar1->parse("\xED\xA0\x80"    ); var_dump(false); } catch(ParseFailureException $e) { var_dump(true); } # 55296d
-try { $grammar1->parse("\xED\xBF\xBF"    ); var_dump(false); } catch(ParseFailureException $e) { var_dump(true); } # 57343d
+try {
+    $grammar1->parse("\xF4\x90\x80\x80"); # code point U+110000, out of range (max is U+10FFFF)
+    var_dump(false);
+} catch (ParseFailureException $e) {
+    var_dump(true);
+}
+try {
+    $grammar1->parse("\xC0\xA6"); # overlong encoding (code point is U+26; should be 1 byte, "\x26")
+    var_dump(false);
+} catch (ParseFailureException $e) {
+    var_dump(true);
+}
+try {
+    $grammar1->parse("\xC3\xFF"); # illegal continuation byte
+    var_dump(false);
+} catch (ParseFailureException $e) {
+    var_dump(true);
+}
+try {
+    $grammar1->parse("\xFF"); # illegal leading byte
+    var_dump(false);
+} catch (ParseFailureException $e) {
+    var_dump(true);
+}
+try {
+    $grammar1->parse("\xC2"); # mid-character termination
+    var_dump(false);
+} catch (ParseFailureException $e) {
+    var_dump(true);
+}
+try {
+    $grammar1->parse("\x00"); # null
+    var_dump(false);
+} catch (ParseFailureException $e) {
+    var_dump(true);
+}
+try {
+    $grammar1->parse("\xED\xA0\x80"); # 55296d
+    var_dump(false);
+} catch (ParseFailureException $e) {
+    var_dump(true);
+}
+try {
+    $grammar1->parse("\xED\xBF\xBF"); # 57343d
+    var_dump(false);
+} catch (ParseFailureException $e) {
+    var_dump(true);
+}
 
 // UTF-8 long form with exceptions
 print("2Bb\n");
@@ -482,16 +578,41 @@ $grammar1 = $locoGrammar->parse(" S ::= [^& <>\\]] ");
 var_dump($grammar1->parse("A") === array("A"));
 var_dump($grammar1->parse("^") === array("^"));
 var_dump($grammar1->parse("\\") === array("\\"));
-try { $grammar1->parse("&"); var_dump(false); } catch(ParseFailureException $e) { var_dump(true); } 
-try { $grammar1->parse(" "); var_dump(false); } catch(ParseFailureException $e) { var_dump(true); } 
-try { $grammar1->parse("<"); var_dump(false); } catch(ParseFailureException $e) { var_dump(true); } 
-try { $grammar1->parse(">"); var_dump(false); } catch(ParseFailureException $e) { var_dump(true); } 
-try { $grammar1->parse("]"); var_dump(false); } catch(ParseFailureException $e) { var_dump(true); } 
+try {
+    $grammar1->parse("&");
+    var_dump(false);
+} catch (ParseFailureException $e) {
+    var_dump(true);
+}
+try {
+    $grammar1->parse(" ");
+    var_dump(false);
+} catch (ParseFailureException $e) {
+    var_dump(true);
+}
+try {
+    $grammar1->parse("<");
+    var_dump(false);
+} catch (ParseFailureException $e) {
+    var_dump(true);
+}
+try {
+    $grammar1->parse(">");
+    var_dump(false);
+} catch (ParseFailureException $e) {
+    var_dump(true);
+}
+try {
+    $grammar1->parse("]");
+    var_dump(false);
+} catch (ParseFailureException $e) {
+    var_dump(true);
+}
 
 // two rules
 print("3A\n");
 $start = microtime(true);
-$grammar2 = $locoGrammar->parse(" 
+$grammar2 = $locoGrammar->parse("
     unicode ::= 'a' '' b | 'grammar' '\\'' '\\\\' \"\\\"\"
     b::=
 ");
@@ -510,33 +631,29 @@ $bracketMatchGrammar = $locoGrammar->parse("
     expression ::= '<' S '>'
 ");
 
-foreach(
-    array(
-        "",
-        "<>",
-        "<><>",
-        "<<>>",
-        "<<<><>>><><<>>"
-    ) as $string
-) {
+foreach (array(
+    "",
+    "<>",
+    "<><>",
+    "<<>>",
+    "<<<><>>><><<>>"
+) as $string) {
     $bracketMatchGrammar->parse($string);
     var_dump(true);
 }
 
-foreach(
-    array(
-        " ",
-        "<",
-        ">",
-        "<><",
-        "<<>",
-        "<<<><>>><><><<<<>>>>>"
-    ) as $string
-) {
+foreach (array(
+    " ",
+    "<",
+    ">",
+    "<><",
+    "<<>",
+    "<<<><>>><><><<<<>>>>>"
+) as $string) {
     try {
         $bracketMatchGrammar->parse($string);
         var_dump(false);
-    } catch(ParseFailureException $e) {
+    } catch (ParseFailureException $e) {
         var_dump(true);
     }
 }
@@ -569,27 +686,26 @@ $jsonGrammar = $locoGrammar->parse("
 $start = microtime(true);
 $result = $jsonGrammar->parse(" { \"string\" : true, \"\\\"\" : false, \"\\u9874asdh\" : [ null, { }, -9488.44E+093 ] } ");
 print("Parsing completed in ".(microtime(true)-$start)." seconds\n");
-var_dump(true); // for successful parsing
+var_dump(true);
+    // for successful parsing
 
 // failure modes
 print("12\n");
-foreach(
-    array(
-        "{ \"string ",        // incomplete string
-        "{ \"\\UAAAA\" ",     // capital U on unicode char
-        "{ \"\\u000i\" ",     // not enough hex digits on unicode char
-        "{ \"a\" : tru ",     // incomplete "true"
-        "{ \"a\" :  +9 ",     // leading +
-        "{ \"a\" :  9. ",     // missing decimal digits
-        "{ \"a\" :  0a8.52 ", // extraneous "a"
-        "{ \"a\" :  8E ",     // missing exponent
-        "{ \"a\" :  08 "      // Two numbers side by side.
-    ) as $string
-) {
+foreach (array(
+    "{ \"string ",        // incomplete string
+    "{ \"\\UAAAA\" ",     // capital U on unicode char
+    "{ \"\\u000i\" ",     // not enough hex digits on unicode char
+    "{ \"a\" : tru ",     // incomplete "true"
+    "{ \"a\" :  +9 ",     // leading +
+    "{ \"a\" :  9. ",     // missing decimal digits
+    "{ \"a\" :  0a8.52 ", // extraneous "a"
+    "{ \"a\" :  8E ",     // missing exponent
+    "{ \"a\" :  08 "      // Two numbers side by side.
+) as $string) {
     try {
         $jsonGrammar->parse($string);
         var_dump(false);
-    } catch(Exception $e) {
+    } catch (Exception $e) {
         var_dump(true);
     }
 }
@@ -619,20 +735,18 @@ $string = $simpleCommentGrammar->parse("
 ");
 print("Parsing completed in ".(microtime(true)-$start)." seconds\n");
 
-foreach(
-    array(
-        "<h5 style=\"\">", // rogue "style" attribute
-        "&",               // unescaped AMPERSAND
-        "<",               // unescaped LESS_THAN
-        "salkhsfg>",       // unescaped GREATER_THAN
-        "</p",             // incomplete CLOSE_P
-        "<br"              // incomplete FULL_BR
-    ) as $string
-) {
+foreach (array(
+    "<h5 style=\"\">", // rogue "style" attribute
+    "&",               // unescaped AMPERSAND
+    "<",               // unescaped LESS_THAN
+    "salkhsfg>",       // unescaped GREATER_THAN
+    "</p",             // incomplete CLOSE_P
+    "<br"              // incomplete FULL_BR
+) as $string) {
     try {
         $simpleCommentGrammar->parse($string);
         var_dump(false);
-    } catch(Exception $e) {
+    } catch (Exception $e) {
         var_dump(true);
     }
 }

@@ -11,20 +11,25 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 # minus($minuend, $subtrahend) is a left-associative operator.
 # e.g. "5 - 4 - 3" means "(5 - 4) - 3 = -2", not "5 - (4 - 3) = 4".
-function minus($minuend, $subtrahend) {
+function minus($minuend, $subtrahend)
+{
     return $minuend - $subtrahend;
 }
 
 # N -> number
 $N = new RegexParser(
     "#^(0|[1-9][0-9]*)#",
-    function($match) { return (int) $match; }
+    function ($match) {
+        return (int) $match;
+    }
 );
 
 # P -> "-" N
 $P = new ConcParser(
     array(new StringParser("-"), $N),
-    function($minus, $n) { return $n; }
+    function ($minus, $n) {
+        return $n;
+    }
 );
 
 # Naive left-recursive grammar looks like this and raises an exception
@@ -64,7 +69,7 @@ $grammar = new Grammar(
                 $N,
                 new GreedyStarParser("P")
             ),
-            function($n, $ps) {
+            function ($n, $ps) {
                 return array_reduce($ps, "minus", $n); # clever bit
             }
         ),

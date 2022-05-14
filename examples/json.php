@@ -163,9 +163,8 @@ $jsonGrammar = new Grammar(
         // "Any UNICODE character except..."
         "UTF8_EXCEPT" => new Utf8Parser(
             array_merge(
-            // "double quote or backslash..."
+                // "double quote or backslash..."
                 array("\"", "\\"),
-
                 // "or control character"
                 array_map(
                     function ($codepoint) {
@@ -223,9 +222,8 @@ var_dump($parseTree["\xE9\xA1\xB4asdh"] === array(null, array(), -9.48844E+96));
 
 print("2\n");
 // failure modes
-foreach (
-    array(
-        "{ \"string "        // incomplete string
+foreach (array(
+    "{ \"string "        // incomplete string
     , "{ \"\\UAAAA\" "     // capital U on unicode char
     , "{ \"\\u000i\" "     // not enough hex digits on unicode char
     , "{ \"a\" : tru "     // incomplete "true"
@@ -241,8 +239,7 @@ foreach (
     , "{\"\n\"      :7}"   // string contains a literal control character
     , "{\"\r\"      :7}"   // string contains a literal control character
     , "{\"\t\"      :7}"   // string contains a literal control character
-    ) as $string
-) {
+) as $string) {
     try {
         $jsonGrammar->parse($string);
         var_dump(false);
