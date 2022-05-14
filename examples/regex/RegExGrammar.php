@@ -1,35 +1,31 @@
 <?php
-namespace Ferno\Loco;
-
-use Exception;
-
-require_once __DIR__ . '/../vendor/autoload.php';
-require_once './Charclass.php';
-require_once './Multiplier.php';
-require_once './Mult.php';
-require_once './Conc.php';
-require_once './Pattern.php';
+require_once __DIR__ . '/../../src/Loco.php';
+require_once __DIR__ . '/Charclass.php';
+require_once __DIR__ . '/Multiplier.php';
+require_once __DIR__ . '/Mult.php';
+require_once __DIR__ . '/Conc.php';
+require_once __DIR__ . '/Pattern.php';
 
 # This code is in the public domain.
 # http://qntm.org/loco
 
-$regexGrammar = new Grammar(
+$regexGrammar = new Ferno\Loco\Grammar(
     "<pattern>",
     array(
         // A Pattern is an alternation between several Concs, separated by pipes.
-        "<pattern>" => new ConcParser(
+        "<pattern>" => new Ferno\Loco\ConcParser(
             array("<conc>", "<pipeconclist>"),
             function ($conc, $pipeconclist) {
                 array_unshift($pipeconclist, $conc);
                 return new Pattern($pipeconclist);
             }
         ),
-        "<pipeconclist>" => new GreedyStarParser(
+        "<pipeconclist>" => new Ferno\Loco\GreedyStarParser(
             "<pipeconc>"
         ),
-        "<pipeconc>" => new ConcParser(
+        "<pipeconc>" => new Ferno\Loco\ConcParser(
             array(
-                new StringParser("|"),
+                new Ferno\Loco\StringParser("|"),
                 "<conc>"
             ),
             function ($pipe, $conc) {
@@ -38,7 +34,7 @@ $regexGrammar = new Grammar(
         ),
 
         // A Conc is a concatenation of several Mults.
-        "<conc>" => new GreedyStarParser(
+        "<conc>" => new Ferno\Loco\GreedyStarParser(
             "<mult>",
             function () {
                 return new Conc(func_get_args());
@@ -47,17 +43,17 @@ $regexGrammar = new Grammar(
 
         // A Mult is a multiplicand (Charclass or sub-Pattern) followed by a multiplier.
         // A subpattern has to be put inside parentheses.
-        "<mult>" => new ConcParser(
+        "<mult>" => new Ferno\Loco\ConcParser(
             array("<multiplicand>", "<multiplier>"),
             function ($multiplicand, $multiplier) {
                 return new Mult($multiplicand, $multiplier);
             }
         ),
-        "<multiplicand>" => new LazyAltParser(
+        "<multiplicand>" => new Ferno\Loco\LazyAltParser(
             array("<subpattern>", "<charclass>")
         ),
-        "<subpattern>" => new ConcParser(
-            array(new StringParser("("), "<pattern>", new StringParser(")")),
+        "<subpattern>" => new Ferno\Loco\ConcParser(
+            array(new Ferno\Loco\StringParser("("), "<pattern>", new Ferno\Loco\StringParser(")")),
             function ($left_parenthesis, $pattern, $right_parenthesis) {
                 return $pattern;
             }
@@ -65,58 +61,58 @@ $regexGrammar = new Grammar(
 
         // A Multiplier has a lower bound and an upper bound. There are several short forms.
         // In the absence of a multiplier, {1,1} is assumed
-        "<multiplier>" => new LazyAltParser(
+        "<multiplier>" => new Ferno\Loco\LazyAltParser(
             array(
                 "<bracemultiplier>",
-                new StringParser("?", function ($string) {
+                new Ferno\Loco\StringParser("?", function ($string) {
                     return new Multiplier(0, 1);
                 }),
-                new StringParser("*", function ($string) {
+                new Ferno\Loco\StringParser("*", function ($string) {
                     return new Multiplier(0, null);
                 }),
-                new StringParser("+", function ($string) {
+                new Ferno\Loco\StringParser("+", function ($string) {
                     return new Multiplier(1, null);
                 }),
-                new EmptyParser(function () {
+                new Ferno\Loco\EmptyParser(function () {
                     return new Multiplier(1, 1);
                 })
             )
         ),
 
-        "<bracemultiplier>" => new ConcParser(
+        "<bracemultiplier>" => new Ferno\Loco\ConcParser(
             array(
-                new StringParser("{"),
+                new Ferno\Loco\StringParser("{"),
                 "<multiplierinterior>",
-                new StringParser("}")
+                new Ferno\Loco\StringParser("}")
             ),
             function ($left_brace, $multiplierinterior, $right_brace) {
                 return $multiplierinterior;
             }
         ),
 
-        "<multiplierinterior>" => new LazyAltParser(
+        "<multiplierinterior>" => new Ferno\Loco\LazyAltParser(
             array("<bothbounds>", "<unlimited>", "<onebound>")
         ),
-        "<bothbounds>" => new ConcParser(
+        "<bothbounds>" => new Ferno\Loco\ConcParser(
             array("<integer>", "COMMA", "<integer>"),
             function ($integer1, $comma, $integer2) {
                 return new Multiplier($integer1, $integer2);
             }
         ),
-        "<unlimited>" => new ConcParser(
+        "<unlimited>" => new Ferno\Loco\ConcParser(
             array("<integer>", "COMMA"),
             function ($integer, $comma) {
                 return new Multiplier($integer, null);
             }
         ),
-        "<onebound>" => new ConcParser(
+        "<onebound>" => new Ferno\Loco\ConcParser(
             array("<integer>"),
             function ($integer) {
                 return new Multiplier($integer, $integer);
             }
         ),
-        "COMMA" => new StringParser(","),
-        "<integer>" => new RegexParser("#^(0|[1-9][0-9]*)#", function ($match) {
+        "COMMA" => new Ferno\Loco\StringParser(","),
+        "<integer>" => new Ferno\Loco\RegexParser("#^(0|[1-9][0-9]*)#", function ($match) {
             return (int)($match);
         }),
 
@@ -124,106 +120,106 @@ $regexGrammar = new Grammar(
         // It can also be a single character escaped with a backslash,
         // or a "true" charclass, which is a possibly-negated set of elements
         // listed inside a pair of brackets.
-        "<charclass>" => new LazyAltParser(
+        "<charclass>" => new Ferno\Loco\LazyAltParser(
             array(
-                new RegexParser("#^[^|()\\[\\]?*+{}\\\\.]#", function ($match) {
+                new Ferno\Loco\RegexParser("#^[^|()\\[\\]?*+{}\\\\.]#", function ($match) {
                     return new Charclass($match);
                 }),
                 "<bracketednegatedcharclass>",
                 "<bracketedcharclass>",
-                new StringParser("\\|", function ($string) {
+                new Ferno\Loco\StringParser("\\|", function ($string) {
                     return new Charclass(substr($string, 1, 1));
                 }),
-                new StringParser("\\(", function ($string) {
+                new Ferno\Loco\StringParser("\\(", function ($string) {
                     return new Charclass(substr($string, 1, 1));
                 }),
-                new StringParser("\\)", function ($string) {
+                new Ferno\Loco\StringParser("\\)", function ($string) {
                     return new Charclass(substr($string, 1, 1));
                 }),
-                new StringParser("\\[", function ($string) {
+                new Ferno\Loco\StringParser("\\[", function ($string) {
                     return new Charclass(substr($string, 1, 1));
                 }),
-                new StringParser("\\]", function ($string) {
+                new Ferno\Loco\StringParser("\\]", function ($string) {
                     return new Charclass(substr($string, 1, 1));
                 }),
-                new StringParser("\\?", function ($string) {
+                new Ferno\Loco\StringParser("\\?", function ($string) {
                     return new Charclass(substr($string, 1, 1));
                 }),
-                new StringParser("\\*", function ($string) {
+                new Ferno\Loco\StringParser("\\*", function ($string) {
                     return new Charclass(substr($string, 1, 1));
                 }),
-                new StringParser("\\+", function ($string) {
+                new Ferno\Loco\StringParser("\\+", function ($string) {
                     return new Charclass(substr($string, 1, 1));
                 }),
-                new StringParser("\\{", function ($string) {
+                new Ferno\Loco\StringParser("\\{", function ($string) {
                     return new Charclass(substr($string, 1, 1));
                 }),
-                new StringParser("\\}", function ($string) {
+                new Ferno\Loco\StringParser("\\}", function ($string) {
                     return new Charclass(substr($string, 1, 1));
                 }),
-                new StringParser("\\\\", function ($string) {
+                new Ferno\Loco\StringParser("\\\\", function ($string) {
                     return new Charclass(substr($string, 1, 1));
                 }),
-                new StringParser("\\.", function ($string) {
+                new Ferno\Loco\StringParser("\\.", function ($string) {
                     return new Charclass(substr($string, 1, 1));
                 }),
-                new StringParser("\\f", function ($string) {
+                new Ferno\Loco\StringParser("\\f", function ($string) {
                     return new Charclass("\f");
                 }),
-                new StringParser("\\n", function ($string) {
+                new Ferno\Loco\StringParser("\\n", function ($string) {
                     return new Charclass("\n");
                 }),
-                new StringParser("\\r", function ($string) {
+                new Ferno\Loco\StringParser("\\r", function ($string) {
                     return new Charclass("\r");
                 }),
-                new StringParser("\\t", function ($string) {
+                new Ferno\Loco\StringParser("\\t", function ($string) {
                     return new Charclass("\t");
                 }),
-                new StringParser("\\v", function ($string) {
+                new Ferno\Loco\StringParser("\\v", function ($string) {
                     return new Charclass("\v");
                 }),
-                new StringParser("\\w", function ($string) {
+                new Ferno\Loco\StringParser("\\w", function ($string) {
                     return new Charclass("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz");
                 }),
-                new StringParser("\\W", function ($string) {
+                new Ferno\Loco\StringParser("\\W", function ($string) {
                     return new Charclass("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz", true);
                 }),
-                new StringParser("\\d", function ($string) {
+                new Ferno\Loco\StringParser("\\d", function ($string) {
                     return new Charclass("0123456789");
                 }),
-                new StringParser("\\D", function ($string) {
+                new Ferno\Loco\StringParser("\\D", function ($string) {
                     return new Charclass("0123456789", true);
                 }),
-                new StringParser("\\s", function ($string) {
+                new Ferno\Loco\StringParser("\\s", function ($string) {
                     return new Charclass(" \f\n\r\t\v");
                 }),
-                new StringParser("\\S", function ($string) {
+                new Ferno\Loco\StringParser("\\S", function ($string) {
                     return new Charclass(" \f\n\r\t\v", true);
                 }),
-                new StringParser(".", function ($string) {
+                new Ferno\Loco\StringParser(".", function ($string) {
                     return new Charclass("", true);
                 })
             )
         ),
 
-        "<bracketednegatedcharclass>" => new ConcParser(
+        "<bracketednegatedcharclass>" => new Ferno\Loco\ConcParser(
             array("LEFT_BRACKET", "CARET", "<elemlist>", "RIGHT_BRACKET"),
             function ($left_bracket, $elemlist, $right_bracket) {
                 return new Charclass($elemlist, true);
             }
         ),
-        "<bracketedcharclass>" => new ConcParser(
+        "<bracketedcharclass>" => new Ferno\Loco\ConcParser(
             array("LEFT_BRACKET", "<elemlist>", "RIGHT_BRACKET"),
             function ($left_bracket, $elemlist, $right_bracket) {
                 return new Charclass($elemlist);
             }
         ),
-        "LEFT_BRACKET"  => new StringParser("["),
-        "RIGHT_BRACKET" => new StringParser("]"),
-        "CARET"         => new StringParser("^"),
+        "LEFT_BRACKET" => new Ferno\Loco\StringParser("["),
+        "RIGHT_BRACKET" => new Ferno\Loco\StringParser("]"),
+        "CARET" => new Ferno\Loco\StringParser("^"),
 
         // A true charclass may be negated with a leading caret.
-        "<elemlist>" => new GreedyStarParser(
+        "<elemlist>" => new Ferno\Loco\GreedyStarParser(
             "<elem>",
             function () {
                 return implode("", func_get_args());
@@ -232,11 +228,11 @@ $regexGrammar = new Grammar(
 
         // An element is either a single character or a character range.
         // A character range is represented with an optional hyphen
-        "<elem>" => new LazyAltParser(
+        "<elem>" => new Ferno\Loco\LazyAltParser(
             array("<charrange>", "<classchar>")
         ),
 
-        "<charrange>" => new ConcParser(
+        "<charrange>" => new Ferno\Loco\ConcParser(
             array("<classchar>", "HYPHEN", "<classchar>"),
             function ($char1, $hyphen, $char2) {
                 $char1 = ord($char1);
@@ -251,75 +247,44 @@ $regexGrammar = new Grammar(
                 return $string;
             }
         ),
-        "HYPHEN" => new StringParser("-"),
+        "HYPHEN" => new Ferno\Loco\StringParser("-"),
 
         // interior characters in character classes usually represent themselves,
         // but some are backslash-escaped
-        "<classchar>" => new LazyAltParser(
+        "<classchar>" => new Ferno\Loco\LazyAltParser(
             array(
-                new RegexParser("#^[^\\\\\\[\\]\\^\\-]#"),
-                new StringParser("\\\\", function ($string) {
+                new Ferno\Loco\RegexParser("#^[^\\\\\\[\\]\\^\\-]#"),
+                new Ferno\Loco\StringParser("\\\\", function ($string) {
                     return substr($string, 1, 1);
                 }),
-                new StringParser("\\[", function ($string) {
+                new Ferno\Loco\StringParser("\\[", function ($string) {
                     return substr($string, 1, 1);
                 }),
-                new StringParser("\\]", function ($string) {
+                new Ferno\Loco\StringParser("\\]", function ($string) {
                     return substr($string, 1, 1);
                 }),
-                new StringParser("\\^", function ($string) {
+                new Ferno\Loco\StringParser("\\^", function ($string) {
                     return substr($string, 1, 1);
                 }),
-                new StringParser("\\-", function ($string) {
+                new Ferno\Loco\StringParser("\\-", function ($string) {
                     return substr($string, 1, 1);
                 }),
-                new StringParser("\\f", function ($string) {
+                new Ferno\Loco\StringParser("\\f", function ($string) {
                     return "\f";
                 }),
-                new StringParser("\\n", function ($string) {
+                new Ferno\Loco\StringParser("\\n", function ($string) {
                     return "\n";
                 }),
-                new StringParser("\\r", function ($string) {
+                new Ferno\Loco\StringParser("\\r", function ($string) {
                     return "\r";
                 }),
-                new StringParser("\\t", function ($string) {
+                new Ferno\Loco\StringParser("\\t", function ($string) {
                     return "\t";
                 }),
-                new StringParser("\\v", function ($string) {
+                new Ferno\Loco\StringParser("\\v", function ($string) {
                     return "\v";
                 })
             )
         )
     )
 );
-
-// apologies for the relative lack of exhaustive unit tests
-
-foreach (array(
-    "a{2}",
-    "a{2,}",
-    "a{2,8}",
-    "[$%\\^]{2,8}",
-    "[ab]*",
-    "([ab]*a)",
-    "([ab]*a|[bc]*c)",
-    "([ab]*a|[bc]*c)?",
-    "([ab]*a|[bc]*c)?b*",
-    "[a-zA-Z]",
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
-    "[a]",
-    "[abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789]",
-    "[|(){},?*+\\[\\]\\^.\\\\]",
-    "[\\f\\n\\r\\t\\v\\-]",
-    "\\|",
-    "\\(\\)\\{\\},\\?\\*\\+\\[\\]^.-\\f\\n\\r\\t\\v\\w\\d\\s\\W\\D\\S\\\\",
-    "abcdef",
-    "19\\d\\d-\\d\\d-\\d\\d",
-    "[$%\\^]{2,}",
-    "[$%\\^]{2}",
-    ""
-) as $string) {
-    $pattern = $regexGrammar->parse($string);
-    print($pattern."\n");
-    var_dump(true);
-}

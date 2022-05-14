@@ -1,6 +1,4 @@
 <?php
-namespace Ferno\Loco\Examples\RegEx;
-
 // Each Mult consists of a multiplicand (a Charclass or a Pattern) and a Multiplier
 class Mult
 {
