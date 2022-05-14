@@ -11,9 +11,11 @@ Loco directly parses strings, requiring no intermediate lexing step.
 
 Loco detects infinite loops (e.g. `(|a)*`) and [left recursion](http://en.wikipedia.org/wiki/Left_recursion) (e.g. `S -> Sa`) at grammar creation time.
 
-## Parsers in Loco
+## API
 
-### `MonoParser`
+Loco exports the following parser classes, all in the `Ferno\Loco` namespace.
+
+### Ferno\Loco\MonoParser
 
 Abstract base class from which all parsers inherit. "Mono" means the parser returns one result, or fails.
 
@@ -21,7 +23,7 @@ Abstract base class from which all parsers inherit. "Mono" means the parser retu
 
 There is also the more useful method `parse($string)`, which either returns the parsed value `"something"` or throws a `Ferno\Loco\ParseFailureException` if the match fails or doesn't occupy the entire length of the supplied string.
 
-### `EmptyParser`
+### Ferno\Loco\EmptyParser
 
 Finds the empty string (and always succeeds). Callback is passed no arguments. Default callback returns `null`.
 
@@ -30,12 +32,12 @@ new Ferno\Loco\EmptyParser();
 // returns null
 
 new Ferno\Loco\EmptyParser(
-  function() { return array(); }
+    function() { return array(); }
 );
 // return an empty array instead
 ```
 
-### `StringParser`
+### Ferno\Loco\StringParser
 
 Finds a static string. Callback is passed one argument, the string which was matched. Yes, that's effectively the same function call each time. Default callback returns the first argument i.e. the string.
 
@@ -44,13 +46,13 @@ new Ferno\Loco\StringParser("name");
 // returns "name"
 
 new Ferno\Loco\StringParser(
-  "name",
-  function($string) { return strrev($string); }
+    "name",
+    function($string) { return strrev($string); }
 );
 // returns "eman"
 ```
 
-### `RegexParser`
+### Ferno\Loco\RegexParser
 
 Matches a regular expression. The regular expression must be anchored at the beginning of the substring supplied to match, using `^`. Otherwise, there's no way to stop PHP from matching elsewhere entirely in the expression, which is very bad. Caution: formations like `/^a|b/` only anchor the `"a"` at the start of the string; a `"b"` might be matched anywhere! You should use `/^(a|b)/` or `/^a|^b/`.
 
@@ -61,13 +63,13 @@ new Ferno\Loco\RegexParser("/^'([a-zA-Z_][a-zA-Z_0-9]*)'/");
 // returns the full match including the single quotes
 
 new Ferno\Loco\RegexParser(
-  "/^'([a-zA-Z_][a-zA-Z_0-9]*)'/",
-  function($match0, $match1) { return $match1; }
+    "/^'([a-zA-Z_][a-zA-Z_0-9]*)'/",
+    function($match0, $match1) { return $match1; }
 );
 // discard the single quotes and returns only the inner string
 ```
 
-### `Utf8Parser`
+### Ferno\Loco\Utf8Parser
 
 Matches a single UTF-8 character. You can optionally supply an exclusion list of characters which will *not* be matched.
 
@@ -80,7 +82,7 @@ Callback is passed one argument, the string that was matched. The default callba
 
 For best results, alternate (see `Ferno\Loco\LazyAltParser` below) with `Ferno\Loco\StringParsers` for e.g. `"&lt;"`, `"&gt;"`, `"&amp;"` and other HTML character entities.
 
-### `LazyAltParser`
+### Ferno\Loco\LazyAltParser
 
 This encapsulates the "alternation" parser combinator by alternating between several internal parsers. The key word here is "lazy". As soon as one of them matches, that result is returned, and that's the end of the story. There is no capability to merge the results from several of the internal parsers, and there is no capability for returning (backtracking) to this parser and trying to retrieve other results if the first one turns out to be bogus.
 
@@ -88,15 +90,15 @@ Callback is passed one argument, the sole successful internal match. The default
 
 ```php
 new Ferno\Loco\LazyAltParser(
-  array(
-    new Ferno\Loco\StringParser("foo"),
-    new Ferno\Loco\StringParser("bar")
-  )
+    array(
+        new Ferno\Loco\StringParser("foo"),
+        new Ferno\Loco\StringParser("bar")
+    )
 );
 // returns either "foo" or "bar"
 ```
 
-### `ConcParser`
+### Ferno\Loco\ConcParser
 
 This encapsulates the "concatenation" parser combinator by concatenating a finite sequence of internal parsers. If the sequence is empty, this is equivalent to `Ferno\Loco\EmptyParser`, above.
 
@@ -104,20 +106,20 @@ Callback is passed one argument for every internal parser, each argument contain
 
 ```php
 new Ferno\Loco\ConcParser(
-  array(
-    new Ferno\Loco\RegexParser("/^<([a-zA-Z_][a-zA-Z_0-9]*)>/", function($match0, $match1) { return $match1; }),
-    new Ferno\Loco\StringParser(", "),
-    new Ferno\Loco\RegexParser("/^<(\d\d\d\d-\d\d-\d\d)>/",     function($match0, $match1) { return $match1; }),
-    new Ferno\Loco\StringParser(", "),
-    new Ferno\Loco\RegexParser("/^<([A-Z]{2}[0-9]{7})>/",       function($match0, $match1) { return $match1; }),
-  ),
-  function($name, $comma1, $opendate, $comma2, $ref) { return new Account($accountname, $opendate, $ref); }
+    array(
+        new Ferno\Loco\RegexParser("/^<([a-zA-Z_][a-zA-Z_0-9]*)>/", function($match0, $match1) { return $match1; }),
+        new Ferno\Loco\StringParser(", "),
+        new Ferno\Loco\RegexParser("/^<(\d\d\d\d-\d\d-\d\d)>/",     function($match0, $match1) { return $match1; }),
+        new Ferno\Loco\StringParser(", "),
+        new Ferno\Loco\RegexParser("/^<([A-Z]{2}[0-9]{7})>/",       function($match0, $match1) { return $match1; }),
+    ),
+    function($name, $comma1, $opendate, $comma2, $ref) { return new Account($accountname, $opendate, $ref); }
 );
 // match something like "<Williams>, <2011-06-30>, <GH7784939>"
 // return new Account("Williams", "2011-06-30", "GH7784939")
 ```
 
-### `GreedyMultiParser`
+### Ferno\Loco\GreedyMultiParser
 
 This encapsulates the "Kleene star closure" parser combinator to match single internal parser multiple (finitely or infinitely many) times. With a finite upper bound, this is more or less equivalent to `Ferno\Loco\ConcParser`, above. With an infinite upper bound, this gets more interesting. `Ferno\Loco\GreedyMultiParser`, as the name hints, will match as many times as it can before returning. There is no option for returning multiple matches simultaneously; only the largest match is returned. And there is no option for backtracking and trying to consume more or fewer instances.
 
@@ -127,23 +129,23 @@ Remember that a PHP function can be defined as `function(){...}` and still accep
 
 ```php
 new Ferno\Loco\GreedyMultiParser(
-  new Ferno\Loco\LazyAltParser(
-    array(
-      new Ferno\Loco\Utf8Parser(array("<", ">", "&")),                         // match any UTF-8 character except <, > or &
-      new Ferno\Loco\StringParser("&lt;",  function($string) { return "<"; }), // ...or an escaped < (unescape it)
-      new Ferno\Loco\StringParser("&gt;",  function($string) { return ">"; }), // ...or an escaped > (unescape it)
-      new Ferno\Loco\StringParser("&amp;", function($string) { return "&"; })  // ...or an escaped & (unescape it)
-    )
-  ),
-  0,                                                  // at least 0 times
-  null,                                               // at most infinitely many times
-  function() { return implode("", func_get_args()); } // concatenate all of the matched characters together
+    new Ferno\Loco\LazyAltParser(
+        array(
+            new Ferno\Loco\Utf8Parser(array("<", ">", "&")),                         // match any UTF-8 character except <, > or &
+            new Ferno\Loco\StringParser("&lt;",  function($string) { return "<"; }), // ...or an escaped < (unescape it)
+            new Ferno\Loco\StringParser("&gt;",  function($string) { return ">"; }), // ...or an escaped > (unescape it)
+            new Ferno\Loco\StringParser("&amp;", function($string) { return "&"; })  // ...or an escaped & (unescape it)
+        )
+    ),
+    0,                                                  // at least 0 times
+    null,                                               // at most infinitely many times
+    function() { return implode("", func_get_args()); } // concatenate all of the matched characters together
 );
 // matches a continuous string of valid, UTF-8 encoded HTML text
 // returns the unescaped string
 ```
 
-### `Grammar`
+### Ferno\Loco\Grammar
 
 All of the above is well and good, but it doesn't complete the picture. Firstly, it makes our parsers quite large and confusing to read when they nest too much. Secondly, it makes recursion very difficult; a parser cannot easily be placed inside itself, for example. Without recursion, all we can parse is regular languages, not context-free languages.
 
@@ -153,39 +155,39 @@ Here's a simple `Ferno\Loco\Grammar` which can recognise (some) valid HTML parag
 
 ```php
 $p = new Ferno\Loco\Grammar(
-  "paragraph",
-  array(
-    "paragraph" => new Ferno\Loco\ConcParser(
-      array(
-        "OPEN_P",
-        "CONTENT",
-        "CLOSE_P"
-      ),
-      function($open_p, $content, $close_p) {
-        return $content;
-      }
-    ),
+    "paragraph",
+    array(
+        "paragraph" => new Ferno\Loco\ConcParser(
+            array(
+                "OPEN_P",
+                "CONTENT",
+                "CLOSE_P"
+            ),
+            function($open_p, $content, $close_p) {
+                return $content;
+            }
+        ),
 
-    "OPEN_P" => new Ferno\Loco\StringParser("<p>"),
+        "OPEN_P" => new Ferno\Loco\StringParser("<p>"),
 
-    "CONTENT" => new Ferno\Loco\GreedyMultiParser(
-      "UTF-8 CHAR",
-      0,
-      null,
-      function() { return implode("", func_get_args()); }
-    ),
+        "CONTENT" => new Ferno\Loco\GreedyMultiParser(
+            "UTF-8 CHAR",
+            0,
+            null,
+            function() { return implode("", func_get_args()); }
+        ),
 
-    "CLOSE_P" => new Ferno\Loco\StringParser("</p>"),
+        "CLOSE_P" => new Ferno\Loco\StringParser("</p>"),
 
-    "UTF-8 CHAR" => new Ferno\Loco\LazyAltParser(
-      array(
-        new Ferno\Loco\Utf8Parser(array("<", ">", "&")),                         // match any UTF-8 character except <, > or &
-        new Ferno\Loco\StringParser("&lt;",  function($string) { return "<"; }), // ...or an escaped < (unescape it)
-        new Ferno\Loco\StringParser("&gt;",  function($string) { return ">"; }), // ...or an escaped > (unescape it)
-        new Ferno\Loco\StringParser("&amp;", function($string) { return "&"; })  // ...or an escaped & (unescape it)
-      )
-    ),
-  )
+        "UTF-8 CHAR" => new Ferno\Loco\LazyAltParser(
+            array(
+                new Ferno\Loco\Utf8Parser(array("<", ">", "&")),                         // match any UTF-8 character except <, > or &
+                new Ferno\Loco\StringParser("&lt;",  function($string) { return "<"; }), // ...or an escaped < (unescape it)
+                new Ferno\Loco\StringParser("&gt;",  function($string) { return ">"; }), // ...or an escaped > (unescape it)
+                new Ferno\Loco\StringParser("&amp;", function($string) { return "&"; })  // ...or an escaped & (unescape it)
+            )
+        ),
+    )
 );
 
 $p->parse("<p>Your text here &amp; here &amp; &lt;here&gt;</p>");
