@@ -1,7 +1,7 @@
 <?php
 use PHPUnit\Framework\TestCase;
 
-require_once __DIR__ . './RegExGrammar.php';
+require_once __DIR__ . '/RegExGrammar.php';
 
 // apologies for the relative lack of exhaustive unit tests
 
