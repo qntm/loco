@@ -352,7 +352,7 @@ if (__FILE__ !== $_SERVER["SCRIPT_FILENAME"]) {
 
 // parentheses inside your BNF *always* force an array to exist in the output
 // *, +, ? and {m,n} are not disguised parentheses;
-    they expand into the main expression
+// they expand into the main expression
 // in the absence of a function to call, an array is is built instead
 
 print("0A\n");

@@ -4,7 +4,7 @@
 
 Parse [JSON](http://json.org/) expressions and returns PHP arrays.
 
-## [regEx.php](regEx.php)
+## [regEx.php](regex/regEx.php)
 
 Parse simple regular expressions and return PHP objects representing them.
 

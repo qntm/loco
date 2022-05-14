@@ -4,6 +4,11 @@ namespace Ferno\Loco;
 use Exception;
 
 require_once __DIR__ . '/../vendor/autoload.php';
+require_once './Charclass.php';
+require_once './Multiplier.php';
+require_once './Mult.php';
+require_once './Conc.php';
+require_once './Pattern.php';
 
 # This code is in the public domain.
 # http://qntm.org/loco
@@ -287,170 +292,6 @@ $regexGrammar = new Grammar(
         )
     )
 );
-
-// Actual regex classes:
-
-// A Charclass is a set of characters, possibly negated.
-class Charclass
-{
-    public $chars = array();
-    public $negateMe = false;
-
-    public function __construct($chars, $negateMe = false)
-    {
-        if (!is_string($chars)) {
-            throw new Exception("Not a string: ".var_export($chars, true));
-        }
-        if (!is_bool($negateMe)) {
-            throw new Exception("Not a boolean: ".var_export($negateMe, true));
-        }
-        for ($i = 0; $i < strlen($chars); $i++) {
-            $char = $chars[$i];
-            if (!in_array($char, $this->chars)) {
-                $this->chars[] = $char;
-            }
-        }
-        $this->negateMe = $negateMe;
-    }
-
-    // This is all a bit naive but it gives you the general picture
-    public function __toString()
-    {
-        if (count($this->chars) === 0) {
-            if ($this->negateMe) {
-                return ".";
-            }
-            throw new Exception("What");
-        }
-
-        if (count($this->chars) === 1 && $this->negateMe === false) {
-            return $this->chars[0];
-        }
-
-        if ($this->negateMe) {
-            return "[^".implode("", $this->chars)."]";
-        }
-
-        return "[".implode("", $this->chars)."]";
-    }
-}
-
-// A Multiplier consists of a non-negative integer lower bound and a non-negative
-// integer upper bound greater than or equal to the lower bound.
-// The upper bound can also be null (infinity)
-class Multiplier
-{
-    public $lower;
-    public $upper;
-
-    public function __construct($lower, $upper)
-    {
-        if (!is_int($lower)) {
-            throw new Exception("Not an integer: ".var_export($lower, true));
-        }
-        if (!is_int($upper) && $upper !== null) {
-            throw new Exception("Not an integer or null: ".var_export($upper, true));
-        }
-        if ($upper !== null && !($lower <= $upper)) {
-            throw new Exception("Upper: ".var_export($upper, true)." is less than lower: ".var_export($lower, true));
-        }
-        $this->lower = $lower;
-        $this->upper = $upper;
-    }
-
-    public function __toString()
-    {
-        if ($this->lower == 1 && $this->upper == 1) {
-            return "";
-        }
-        if ($this->lower == 0 && $this->upper == 1) {
-            return "?";
-        }
-        if ($this->lower == 0 && $this->upper === null) {
-            return "*";
-        }
-        if ($this->lower == 1 && $this->upper === null) {
-            return "+";
-        }
-        if ($this->upper === null) {
-            return "{".$this->lower.",}";
-        }
-        if ($this->lower == $this->upper) {
-            return "{".$this->lower."}";
-        }
-        return "{".$this->lower.",".$this->upper."}";
-    }
-}
-
-// Each Mult consists of a multiplicand (a Charclass or a Pattern) and a Multiplier
-class Mult
-{
-    public $multiplicand;
-    public $multiplier;
-
-    public function __construct($multiplicand, $multiplier)
-    {
-        if (!is_a($multiplicand, "Charclass") && !is_a($multiplicand, "Pattern")) {
-            throw new Exception("Not a Charclass or Pattern: ".var_export($multiplicand, true));
-        }
-        if (!is_a($multiplier, "Multiplier")) {
-            throw new Exception("Not a Multiplier: ".var_export($multiplier, true));
-        }
-        $this->multiplicand = $multiplicand;
-        $this->multiplier = $multiplier;
-    }
-
-    public function __toString()
-    {
-        if (is_a($this->multiplicand, "Pattern")) {
-            return "(".$this->multiplicand.")".$this->multiplier;
-        }
-        return $this->multiplicand.$this->multiplier;
-    }
-}
-
-// Each Conc is a concatenation of several "Mults"
-class Conc
-{
-    public $mults;
-
-    public function __construct($mults)
-    {
-        foreach ($mults as $mult) {
-            if (!is_a($mult, "Mult")) {
-                throw new Exception("Not a Mult: ".var_export($mult, true));
-            }
-        }
-        $this->mults = $mults;
-    }
-
-    public function __toString()
-    {
-        return implode("", $this->mults);
-    }
-}
-
-// Each Pattern is an alternation between several "Concs"
-// This is the top-level Pattern object returned by the lexer.
-class Pattern
-{
-    public $concs;
-
-    public function __construct($concs)
-    {
-        foreach ($concs as $conc) {
-            if (!is_a($conc, "Conc")) {
-                throw new Exception("Not a Conc: ".var_export($conc, true));
-            }
-        }
-        $this->concs = $concs;
-    }
-
-    public function __toString()
-    {
-        return implode("|", $this->concs);
-    }
-}
 
 // apologies for the relative lack of exhaustive unit tests
 
