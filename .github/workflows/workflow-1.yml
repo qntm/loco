@@ -20,4 +20,4 @@ jobs:
         php-version: '${{ matrix.php-versions }}'
     - name: 'Actual composer tasks'
       run: |
-        composer run-script test
+        composer run-script lint
