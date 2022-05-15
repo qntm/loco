@@ -46,7 +46,6 @@ function serialiseArray($array)
 // j and result, or throws a ParseFailureException. These are, then, "monoparsers"
 abstract class MonoParser
 {
-
     // A string form for any parser should be generated at instantiation time.
     // This string should be *approximately* the "new MonoParser()" syntax,
     // although stringifying the callback is problematic so don't bother trying.
@@ -301,8 +300,8 @@ class Utf8Parser extends StaticParser
         array(
             "numbytes" => 1,
             "freebits" => array(7), # 0xxxxxxx
-            "mask" => "\x80",    # 10000000
-            "result" => "\x00",    # 00000000
+            "mask" => "\x80",       # 10000000
+            "result" => "\x00",     # 00000000
             "extract" => "\x7F",    # 01111111
             "mincodepoint" => 0,
             "maxcodepoint" => 127
@@ -310,8 +309,8 @@ class Utf8Parser extends StaticParser
         array(
             "numbytes" => 2,
             "freebits" => array(5, 6), # 110xxxxx 10xxxxxx
-            "mask" => "\xE0\xC0",   # 11100000 11000000
-            "result" => "\xC0\x80",   # 11000000 10000000
+            "mask" => "\xE0\xC0",      # 11100000 11000000
+            "result" => "\xC0\x80",    # 11000000 10000000
             "extract" => "\x1F\x3F",   # 00011111 00111111
             "mincodepoint" => 128,
             "maxcodepoint" => 2047
@@ -319,8 +318,8 @@ class Utf8Parser extends StaticParser
         array(
             "numbytes" => 3,
             "freebits" => array(4, 6, 6), # 1110xxxx 10xxxxxx 10xxxxxx
-            "mask" => "\xF0\xC0\xC0",  # 11110000 11000000 11000000
-            "result" => "\xE0\x80\x80",  # 11100000 10000000 10000000
+            "mask" => "\xF0\xC0\xC0",     # 11110000 11000000 11000000
+            "result" => "\xE0\x80\x80",   # 11100000 10000000 10000000
             "extract" => "\x0F\x3F\x3F",  # 00001111 00111111 00111111
             "mincodepoint" => 2048,
             "maxcodepoint" => 65535
@@ -328,8 +327,8 @@ class Utf8Parser extends StaticParser
         array(
             "numbytes" => 4,
             "freebits" => array(3, 6, 6, 6), # 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
-            "mask" => "\xF8\xC0\xC0\xC0", # 11111000 11000000 11000000 11000000
-            "result" => "\xF0\x80\x80\x80", # 11110000 10000000 10000000 10000000
+            "mask" => "\xF8\xC0\xC0\xC0",    # 11111000 11000000 11000000 11000000
+            "result" => "\xF0\x80\x80\x80",  # 11110000 10000000 10000000 10000000
             "extract" => "\x07\x3F\x3F\x3F", # 00000111 00111111 00111111 00111111
             "mincodepoint" => 65536,
             "maxcodepoint" => 2097151
@@ -487,6 +486,8 @@ class Utf8Parser extends StaticParser
             $string |= $expression["result"];
             return $string;
         }
+
+        throw new Exception('codepoint too large');
     }
 }
 
@@ -792,9 +793,10 @@ class Grammar extends MonoParser
         // it is going to loop forever.
         // In this situation, we raise a very serious error
         foreach ($this->internals as $internal) {
-            if (!is_a($internal, "GreedyMultiParser")) {
+            if (!($internal instanceof GreedyMultiParser)) {
                 continue;
             }
+
             if ($internal->optional !== null) {
                 continue;
             }

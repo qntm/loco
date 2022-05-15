@@ -1,7 +1,7 @@
 <?php
-use PHPUnit\Framework\TestCase;
+namespace Ferno\Loco;
 
-require_once __DIR__ . '/WirthGrammar.php';
+use PHPUnit\Framework\TestCase;
 
 final class WirthGrammarTest extends TestCase
 {
@@ -18,10 +18,10 @@ final class WirthGrammarTest extends TestCase
             EXPRESSION = TERM { \"|\" TERM } .
             TERM       = FACTOR { FACTOR } .
             FACTOR     = IDENTIFIER
-                                 | LITERAL
-                                 | \"[\" EXPRESSION \"]\"
-                                 | \"(\" EXPRESSION \")\"
-                                 | \"{\" EXPRESSION \"}\" .
+                       | LITERAL
+                       | \"[\" EXPRESSION \"]\"
+                       | \"(\" EXPRESSION \")\"
+                       | \"{\" EXPRESSION \"}\" .
             IDENTIFIER = letter { letter } .
             LITERAL    = \"\"\"\" character { character } \"\"\"\" .
             digit      = \"0\" | \"1\" | \"2\" | \"3\" | \"4\" | \"5\" | \"6\" | \"7\" | \"8\" | \"9\" .

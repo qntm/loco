@@ -24,7 +24,8 @@
     "scripts": {
         "lint": "./vendor/bin/parallel-lint --exclude vendor .",
         "cs": "./vendor/bin/phpcs --colors -w -p --standard=PSR2,./phpcs.xml --ignore=*/vendor/* .",
-        "unit": "./vendor/bin/phpunit examples",
-        "test": "composer lint && composer cs && composer unit"
+        "unit-src": "./vendor/bin/phpunit src",
+        "unit-examples": "./vendor/bin/phpunit examples",
+        "test": "composer lint && composer cs && composer unit-src && composer unit-examples"
     }
 }
