@@ -196,7 +196,7 @@ $p->parse("<p>Your text here &amp; here &amp; &lt;here&gt;</p>");
 
 ## Examples
 
-Loco also comes with [a collection of public domain examples](examples).
+Loco also comes with [a collection of public domain examples](src/examples).
 
 ## Development
 
