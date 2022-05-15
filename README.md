@@ -209,7 +209,7 @@ composer install
 to install all dependencies, then
 
 ```sh
-composer test
+composer run-script test
 ```
 
 to run the test scripts, including linting.
