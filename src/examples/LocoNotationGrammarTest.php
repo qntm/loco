@@ -8,7 +8,7 @@ final class LocoNotationGrammarTest extends TestCase
 {
     private static $locoGrammar;
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         self::$locoGrammar = new LocoNotationGrammar();
     }

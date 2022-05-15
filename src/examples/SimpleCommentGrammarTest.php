@@ -8,7 +8,7 @@ final class SimpleCommentGrammarTest extends TestCase
 {
     private static $simpleCommentGrammar;
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         self::$simpleCommentGrammar = new SimpleCommentGrammar();
     }

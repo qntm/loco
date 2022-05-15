@@ -7,7 +7,7 @@ final class WirthGrammarTest extends TestCase
 {
     private static $wirthGrammar;
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         self::$wirthGrammar = new WirthGrammar();
     }

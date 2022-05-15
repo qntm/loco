@@ -10,7 +10,7 @@ final class JsonGrammarTest extends TestCase
 {
     private static $jsonGrammar;
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         self::$jsonGrammar = new JsonGrammar();
     }

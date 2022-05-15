@@ -8,7 +8,6 @@ use Exception;
 // Callback should accept the character (in the form of bytes)
 class Utf8Parser extends StaticParser
 {
-
     # Some basic useful information about each possible byte
     # sequence i.e. prefix and number of free bits
     # binary expressions for extracting useful information

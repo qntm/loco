@@ -8,7 +8,7 @@ final class BnfGrammarTest extends TestCase
 {
     private static $bnfGrammar;
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         self::$bnfGrammar = new BnfGrammar();
     }

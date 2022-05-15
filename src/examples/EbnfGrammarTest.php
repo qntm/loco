@@ -12,7 +12,7 @@ final class EbnfGrammarTest extends TestCase
 {
     private static $ebnfGrammar;
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         self::$ebnfGrammar = new EbnfGrammar();
     }

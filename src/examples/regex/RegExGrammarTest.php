@@ -9,7 +9,7 @@ final class RegExGrammarTest extends TestCase
 {
     private static $regexGrammar;
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         self::$regexGrammar = new RegExGrammar();
     }
