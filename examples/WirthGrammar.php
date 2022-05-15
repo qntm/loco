@@ -1,42 +1,35 @@
 <?php
-namespace Ferno\Loco;
-
-use Exception;
-
-require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../src/Loco.php';
 
 // Takes a string presented in Wirth syntax notation and turn it into a new
 // Grammar object capable of recognising the language described by that string.
 // http://en.wikipedia.org/wiki/Wirth_syntax_notation
 
-# This code is in the public domain.
-# http://qntm.org/locoparser
-
-$wirthGrammar = new Grammar(
+$wirthGrammar = new Ferno\Loco\Grammar(
     "SYNTAX",
     array(
-        "SYNTAX" => new GreedyStarParser("PRODUCTION"),
-        "PRODUCTION" => new ConcParser(
+        "SYNTAX" => new Ferno\Loco\GreedyStarParser("PRODUCTION"),
+        "PRODUCTION" => new Ferno\Loco\ConcParser(
             array(
                 "whitespace",
                 "IDENTIFIER",
-                new StringParser("="),
+                new Ferno\Loco\StringParser("="),
                 "whitespace",
                 "EXPRESSION",
-                new StringParser("."),
+                new Ferno\Loco\StringParser("."),
                 "whitespace"
             ),
             function ($space1, $identifier, $equals, $space2, $expression, $dot, $space3) {
                 return array("identifier" => $identifier, "expression" => $expression);
             }
         ),
-        "EXPRESSION" => new ConcParser(
+        "EXPRESSION" => new Ferno\Loco\ConcParser(
             array(
                 "TERM",
-                new GreedyStarParser(
-                    new ConcParser(
+                new Ferno\Loco\GreedyStarParser(
+                    new Ferno\Loco\ConcParser(
                         array(
-                            new StringParser("|"),
+                            new Ferno\Loco\StringParser("|"),
                             "whitespace",
                             "TERM"
                         ),
@@ -48,62 +41,62 @@ $wirthGrammar = new Grammar(
             ),
             function ($term, $terms) {
                 array_unshift($terms, $term);
-                return new LazyAltParser($terms);
+                return new Ferno\Loco\LazyAltParser($terms);
             }
         ),
-        "TERM" => new GreedyMultiParser(
+        "TERM" => new Ferno\Loco\GreedyMultiParser(
             "FACTOR",
             1,
             null,
             function () {
-                return new ConcParser(func_get_args());
+                return new Ferno\Loco\ConcParser(func_get_args());
             }
         ),
-        "FACTOR" => new LazyAltParser(
+        "FACTOR" => new Ferno\Loco\LazyAltParser(
             array(
                 "IDENTIFIER",
                 "LITERAL",
-                new ConcParser(
+                new Ferno\Loco\ConcParser(
                     array(
-                        new StringParser("["),
+                        new Ferno\Loco\StringParser("["),
                         "whitespace",
                         "EXPRESSION",
-                        new StringParser("]"),
+                        new Ferno\Loco\StringParser("]"),
                         "whitespace"
                     ),
                     function ($bracket1, $space1, $expression, $bracket2, $space2) {
-                        return new GreedyMultiParser($expression, 0, 1);
+                        return new Ferno\Loco\GreedyMultiParser($expression, 0, 1);
                     }
                 ),
-                new ConcParser(
+                new Ferno\Loco\ConcParser(
                     array(
-                        new StringParser("("),
+                        new Ferno\Loco\StringParser("("),
                         "whitespace",
                         "EXPRESSION",
-                        new StringParser(")"),
+                        new Ferno\Loco\StringParser(")"),
                         "whitespace"
                     ),
                     function ($paren1, $space1, $expression, $paren2, $space2) {
                         return $expression;
                     }
                 ),
-                new ConcParser(
+                new Ferno\Loco\ConcParser(
                     array(
-                        new StringParser("{"),
+                        new Ferno\Loco\StringParser("{"),
                         "whitespace",
                         "EXPRESSION",
-                        new StringParser("}"),
+                        new Ferno\Loco\StringParser("}"),
                         "whitespace"
                     ),
                     function ($brace1, $space1, $expression, $brace2, $space2) {
-                        return new GreedyStarParser($expression);
+                        return new Ferno\Loco\GreedyStarParser($expression);
                     }
                 )
             )
         ),
-        "IDENTIFIER" => new ConcParser(
+        "IDENTIFIER" => new Ferno\Loco\ConcParser(
             array(
-                new GreedyMultiParser(
+                new Ferno\Loco\GreedyMultiParser(
                     "letter",
                     1,
                     null,
@@ -117,10 +110,10 @@ $wirthGrammar = new Grammar(
                 return $letters;
             }
         ),
-        "LITERAL" => new ConcParser(
+        "LITERAL" => new Ferno\Loco\ConcParser(
             array(
-                new StringParser("\""),
-                new GreedyMultiParser(
+                new Ferno\Loco\StringParser("\""),
+                new Ferno\Loco\GreedyMultiParser(
                     "character",
                     1,
                     null,
@@ -128,16 +121,16 @@ $wirthGrammar = new Grammar(
                         return implode("", func_get_args());
                     }
                 ),
-                new StringParser("\""),
+                new Ferno\Loco\StringParser("\""),
                 "whitespace"
             ),
             function ($quote1, $chars, $quote2, $whitespace) {
-                return new StringParser($chars);
+                return new Ferno\Loco\StringParser($chars);
             }
         ),
-        "digit" => new RegexParser("#^[0-9]#"),
-        "letter" => new RegexParser("#^[a-zA-Z]#"),
-        "character" => new RegexParser(
+        "digit" => new Ferno\Loco\RegexParser("#^[0-9]#"),
+        "letter" => new Ferno\Loco\RegexParser("#^[a-zA-Z]#"),
+        "character" => new Ferno\Loco\RegexParser(
             "#^([^\"]|\"\")#",
             function ($match0) {
                 if ($match0 === "\"\"") {
@@ -146,7 +139,7 @@ $wirthGrammar = new Grammar(
                 return $match0;
             }
         ),
-        "whitespace" => new RegexParser("#^[ \n\r\t]*#")
+        "whitespace" => new Ferno\Loco\RegexParser("#^[ \n\r\t]*#")
     ),
     function ($syntax) {
         $parsers = array();
@@ -159,37 +152,6 @@ $wirthGrammar = new Grammar(
         if (count($parsers) === 0) {
             throw new Exception("No rules.");
         }
-        return new Grammar($top, $parsers);
+        return new Ferno\Loco\Grammar($top, $parsers);
     }
 );
-
-// if executing this file directly, run unit tests
-if (__FILE__ !== $_SERVER["SCRIPT_FILENAME"]) {
-    return;
-}
-
-// This is the syntax for Wirth syntax notation except it lacks whitespace
-$string = "
-    SYNTAX     = { PRODUCTION } .
-    PRODUCTION = IDENTIFIER \"=\" EXPRESSION \".\" .
-    EXPRESSION = TERM { \"|\" TERM } .
-    TERM       = FACTOR { FACTOR } .
-    FACTOR     = IDENTIFIER
-                         | LITERAL
-                         | \"[\" EXPRESSION \"]\"
-                         | \"(\" EXPRESSION \")\"
-                         | \"{\" EXPRESSION \"}\" .
-    IDENTIFIER = letter { letter } .
-    LITERAL    = \"\"\"\" character { character } \"\"\"\" .
-    digit      = \"0\" | \"1\" | \"2\" | \"3\" | \"4\" | \"5\" | \"6\" | \"7\" | \"8\" | \"9\" .
-    upper      = \"A\" | \"B\" | \"C\" | \"D\" | \"E\" | \"F\" | \"G\" | \"H\" | \"I\" | \"J\"
-               | \"K\" | \"L\" | \"M\" | \"N\" | \"O\" | \"P\" | \"Q\" | \"R\" | \"S\" | \"T\"
-               | \"U\" | \"V\" | \"W\" | \"X\" | \"Y\" | \"Z\" .
-    lower      = \"a\" | \"b\" | \"c\" | \"d\" | \"e\" | \"f\" | \"g\" | \"h\" | \"i\" | \"j\"
-               | \"k\" | \"l\" | \"m\" | \"n\" | \"o\" | \"p\" | \"q\" | \"r\" | \"s\" | \"t\"
-               | \"u\" | \"v\" | \"w\" | \"x\" | \"y\" | \"z\" .
-    letter     = upper | lower .
-    character  = letter | digit | \"=\" | \".\" | \"\"\"\"\"\" .
-";
-$wirthGrammar->parse($string)->parse("SYNTAX={PRODUCTION}.");
-var_dump(true); # for a successful parse

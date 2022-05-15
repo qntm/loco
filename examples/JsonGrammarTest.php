@@ -42,7 +42,7 @@ final class JsonGrammarTest extends TestCase
             $threw = false;
             try {
                 $jsonGrammar->parse($string);
-            } catch (Exception $e) {
+            } catch (Ferno\Loco\ParseFailureException $e) {
                 $threw = true;
             }
             $this->assertEquals($threw, true);

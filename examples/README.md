@@ -1,6 +1,6 @@
 # Loco examples
 
-## [json.php](json.php)
+## [JsonGrammar.php](JsonGrammar.php)
 
 Parse [JSON](http://json.org/) expressions and returns PHP arrays.
 
@@ -8,11 +8,11 @@ Parse [JSON](http://json.org/) expressions and returns PHP arrays.
 
 Parse simple regular expressions and return PHP objects representing them.
 
-## [simpleComment.php](simpleComment.php)
+## [SimpleCommentGrammar.php](SimpleCommentGrammar.php)
 
 Recognise simple valid HTML text using `<h5>`, `<p>`, `<em>` and `<strong>`, with balanced tags and escaped entities.
 
-## [bnf.php](bnf.php)
+## [BnfGrammar.php](BnfGrammar.php)
 
 Defines `$bnfGrammar`, which parses a grammar presented in [Backus-Naur Form](http://en.wikipedia.org/wiki/Backus%E2%80%93Naur_Form) and returns `Ferno\Loco\Grammar` object capable of recognising that grammar.
 
@@ -49,7 +49,7 @@ This appears on Wikipedia. This is a pretty clunky example because it doesn't ha
 Steve MacLaurin \n173 Acacia Avenue 7A\nStevenage, KY 33445\n
 ```
 
-## [wirth.php](wirth.php)
+## [WirthGrammar.php](WirthGrammar.php)
 
 Defines `$wirthGrammar`, which parses a grammar presented in [Wirth syntax notation](http://en.wikipedia.org/wiki/Wirth_syntax_notation) and returns a `Ferno\Loco\Grammar` object capable of recognising that grammar.
 
@@ -88,7 +88,7 @@ This example grammar happens to be the grammar which describes Wirth syntax nota
 SYNTAX={PRODUCTION}.
 ```
 
-## [ebnf.php](ebnf.php)
+## [EbnfGrammar.php](EbnfGrammar.php)
 Defines `$ebnfGrammar`, which parses a grammar presented in [Extended Backus-Naur Form](http://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_Form) and returns a `Grammar` object capable of recognising that grammar.
 
 This is a big improvement on vanilla BNF (comments are a must!) but the need for commas between tokens is irritating and again, braces and square brackets aren't ideal in my mind.
@@ -131,7 +131,7 @@ BEGIN
 END."
 ```
 
-## [locoNotation.php](locoNotation.php)
+## [LocoNotationGrammar.php](LocoNotationGrammar.php)
 
 Defines `$locoGrammar`, which parses a grammar presented in "Loco notation" and returns a `Ferno\Loco\Grammar` object capable of parsing that grammar.
 
@@ -154,7 +154,7 @@ In all cases where a "literal" is provided (strings, regexes, UTF-8 exceptions),
 
 ### Sample grammar in Loco notation
 
-Remember [simpleComment.php](simpleComment.php)? Here is that grammar in Loco notation.
+Remember [SimpleCommentGrammar.php](SimpleCommentGrammar.php)? Here is that grammar in Loco notation.
 
 ```
 comment    ::= whitespace block*

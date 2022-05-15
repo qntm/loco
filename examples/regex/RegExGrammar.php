@@ -6,9 +6,6 @@ require_once __DIR__ . '/Mult.php';
 require_once __DIR__ . '/Conc.php';
 require_once __DIR__ . '/Pattern.php';
 
-# This code is in the public domain.
-# http://qntm.org/loco
-
 $regexGrammar = new Ferno\Loco\Grammar(
     "<pattern>",
     array(

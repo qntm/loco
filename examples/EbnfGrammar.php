@@ -1,10 +1,4 @@
 <?php
-namespace Ferno\Loco;
-
-use Exception;
-
-require_once __DIR__ . '/../vendor/autoload.php';
-
 // Takes a string presented in Extended Backus-Naur Form and turns it into a new Grammar
 // object capable of recognising the language described by that string.
 // http://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_Form
@@ -12,23 +6,20 @@ require_once __DIR__ . '/../vendor/autoload.php';
 // Can't handle exceptions, since these are not context-free
 // Can't handle specials, which have no clear definition
 
-# This code is in the public domain.
-# http://qntm.org/locoparser
-
-$ebnfGrammar = new Grammar(
+$ebnfGrammar = new Ferno\Loco\Grammar(
     "<syntax>",
     array(
-        "<syntax>" => new ConcParser(
+        "<syntax>" => new Ferno\Loco\ConcParser(
             array("<space>", "<rules>"),
             function ($space, $rules) {
                 return $rules;
             }
         ),
 
-        "<rules>" => new GreedyStarParser("<rule>"),
+        "<rules>" => new Ferno\Loco\GreedyStarParser("<rule>"),
 
-        "<rule>" => new ConcParser(
-            array("<bareword>", "<space>", new StringParser("="), "<space>", "<alt>", new StringParser(";"), "<space>"),
+        "<rule>" => new Ferno\Loco\ConcParser(
+            array("<bareword>", "<space>", new Ferno\Loco\StringParser("="), "<space>", "<alt>", new Ferno\Loco\StringParser(";"), "<space>"),
             function ($bareword, $space1, $equals, $space2, $alt, $semicolon, $space3) {
                 return array(
                     "rule-name"  => $bareword,
@@ -37,24 +28,24 @@ $ebnfGrammar = new Grammar(
             }
         ),
 
-        "<alt>" => new ConcParser(
+        "<alt>" => new Ferno\Loco\ConcParser(
             array("<conc>", "<pipeconclist>"),
             function ($conc, $pipeconclist) {
                 array_unshift($pipeconclist, $conc);
-                return new LazyAltParser($pipeconclist);
+                return new Ferno\Loco\LazyAltParser($pipeconclist);
             }
         ),
 
-        "<pipeconclist>" => new GreedyStarParser("<pipeconc>"),
+        "<pipeconclist>" => new Ferno\Loco\GreedyStarParser("<pipeconc>"),
 
-        "<pipeconc>" => new ConcParser(
-            array(new StringParser("|"), "<space>", "<conc>"),
+        "<pipeconc>" => new Ferno\Loco\ConcParser(
+            array(new Ferno\Loco\StringParser("|"), "<space>", "<conc>"),
             function ($pipe, $space, $conc) {
                 return $conc;
             }
         ),
 
-        "<conc>" => new ConcParser(
+        "<conc>" => new Ferno\Loco\ConcParser(
             array("<term>", "<commatermlist>"),
             function ($term, $commatermlist) {
                 array_unshift($commatermlist, $term);
@@ -71,7 +62,7 @@ $ebnfGrammar = new Grammar(
                 // We do something quite advanced here. The inner multiparsers are
                 // spliced out into the list of arguments proper instead of forming an
                 // internal sub-array of their own
-                return new ConcParser(
+                return new Ferno\Loco\ConcParser(
                     $commatermlist,
                     function () use ($multiparsers) {
                         $args = func_get_args();
@@ -84,22 +75,22 @@ $ebnfGrammar = new Grammar(
             }
         ),
 
-        "<commatermlist>" => new GreedyStarParser("<commaterm>"),
+        "<commatermlist>" => new Ferno\Loco\GreedyStarParser("<commaterm>"),
 
-        "<commaterm>" => new ConcParser(
-            array(new StringParser(","), "<space>", "<term>"),
+        "<commaterm>" => new Ferno\Loco\ConcParser(
+            array(new Ferno\Loco\StringParser(","), "<space>", "<term>"),
             function ($comma, $space, $term) {
                 return $term;
             }
         ),
 
-        "<term>" => new LazyAltParser(
+        "<term>" => new Ferno\Loco\LazyAltParser(
             array("<bareword>", "<sq>", "<dq>", "<group>", "<repetition>", "<optional>")
         ),
 
-        "<bareword>" => new ConcParser(
+        "<bareword>" => new Ferno\Loco\ConcParser(
             array(
-                new RegexParser(
+                new Ferno\Loco\RegexParser(
                     "#^([a-z][a-z ]*[a-z]|[a-z])#",
                     function ($match0) {
                         return $match0;
@@ -112,15 +103,15 @@ $ebnfGrammar = new Grammar(
             }
         ),
 
-        "<sq>" => new ConcParser(
+        "<sq>" => new Ferno\Loco\ConcParser(
             array(
-                new RegexParser(
+                new Ferno\Loco\RegexParser(
                     "#^'([^']*)'#",
                     function ($match0, $match1) {
                         if ($match1 === "") {
-                            return new EmptyParser();
+                            return new Ferno\Loco\EmptyParser();
                         }
-                        return new StringParser($match1);
+                        return new Ferno\Loco\StringParser($match1);
                     }
                 ),
                 "<space>"
@@ -130,15 +121,15 @@ $ebnfGrammar = new Grammar(
             }
         ),
 
-        "<dq>" => new ConcParser(
+        "<dq>" => new Ferno\Loco\ConcParser(
             array(
-                new RegexParser(
+                new Ferno\Loco\RegexParser(
                     '#^"([^"]*)"#',
                     function ($match0, $match1) {
                         if ($match1 === "") {
-                            return new EmptyParser();
+                            return new Ferno\Loco\EmptyParser();
                         }
-                        return new StringParser($match1);
+                        return new Ferno\Loco\StringParser($match1);
                     }
                 ),
                 "<space>"
@@ -148,12 +139,12 @@ $ebnfGrammar = new Grammar(
             }
         ),
 
-        "<group>" => new ConcParser(
+        "<group>" => new Ferno\Loco\ConcParser(
             array(
-                new StringParser("("),
+                new Ferno\Loco\StringParser("("),
                 "<space>",
                 "<alt>",
-                new StringParser(")"),
+                new Ferno\Loco\StringParser(")"),
                 "<space>"
             ),
             function ($left_paren, $space1, $alt, $right_paren, $space2) {
@@ -161,40 +152,40 @@ $ebnfGrammar = new Grammar(
             }
         ),
 
-        "<repetition>" => new ConcParser(
+        "<repetition>" => new Ferno\Loco\ConcParser(
             array(
-                new StringParser("{"),
+                new Ferno\Loco\StringParser("{"),
                 "<space>",
                 "<alt>",
-                new StringParser("}"),
+                new Ferno\Loco\StringParser("}"),
                 "<space>"
             ),
             function ($left_brace, $space1, $alt, $right_brace, $space2) {
-                return new GreedyStarParser($alt);
+                return new Ferno\Loco\GreedyStarParser($alt);
             }
         ),
 
-        "<optional>" => new ConcParser(
+        "<optional>" => new Ferno\Loco\ConcParser(
             array(
-                new StringParser("["),
+                new Ferno\Loco\StringParser("["),
                 "<space>",
                 "<alt>",
-                new StringParser("]"),
+                new Ferno\Loco\StringParser("]"),
                 "<space>"
             ),
             function ($left_bracket, $space1, $alt, $right_bracket, $space2) {
-                return new GreedyMultiParser($alt, 0, 1);
+                return new Ferno\Loco\GreedyMultiParser($alt, 0, 1);
             }
         ),
 
-        "<space>" => new GreedyStarParser("<whitespace/comment>"),
+        "<space>" => new Ferno\Loco\GreedyStarParser("<whitespace/comment>"),
 
-        "<whitespace/comment>" => new LazyAltParser(
+        "<whitespace/comment>" => new Ferno\Loco\LazyAltParser(
             array("<whitespace>", "<comment>")
         ),
 
-        "<whitespace>" => new RegexParser("#^[ \t\r\n]+#"),
-        "<comment>" => new RegexParser("#^(\(\* [^*]* \*\)|\(\* \*\)|\(\*\*\))#")
+        "<whitespace>" => new Ferno\Loco\RegexParser("#^[ \t\r\n]+#"),
+        "<comment>" => new Ferno\Loco\RegexParser("#^(\(\* [^*]* \*\)|\(\* \*\)|\(\*\*\))#")
     ),
     function ($syntax) {
         $parsers = array();
@@ -207,62 +198,6 @@ $ebnfGrammar = new Grammar(
         if (count($parsers) === 0) {
             throw new Exception("No rules.");
         }
-        return new Grammar($top, $parsers);
+        return new Ferno\Loco\Grammar($top, $parsers);
     }
 );
-
-// if executing this file directly, run unit tests
-if (__FILE__ !== $_SERVER["SCRIPT_FILENAME"]) {
-    return;
-}
-
-$string = "a = 'PROGRAM' ;";
-$ebnfGrammar->parse($string)->parse("PROGRAM");
-var_dump(true);
-
-// Should raise a ParseFailureException before trying to instantiate a Grammar
-// with no rules and raising a GrammarException
-$string = "a = 'PROGRAM ;";
-try {
-    $ebnfGrammar->parse($string);
-    var_dump(false);
-} catch (ParseFailureException $e) {
-    var_dump(true);
-}
-
-// Full rule set
-$string = "
-    (* a simple program syntax in EBNF - Wikipedia *)
-    program = 'PROGRAM' , white space , identifier , white space ,
-                         'BEGIN' , white space ,
-                         { assignment , \";\" , white space } ,
-                         'END.' ;
-    identifier = alphabetic character , { alphabetic character | digit } ;
-    number = [ \"-\" ] , digit , { digit } ;
-    string = '\"' , { all characters } , '\"' ;
-    assignment = identifier , \":=\" , ( number | identifier | string ) ;
-    alphabetic character = \"A\" | \"B\" | \"C\" | \"D\" | \"E\" | \"F\" | \"G\"
-                                             | \"H\" | \"I\" | \"J\" | \"K\" | \"L\" | \"M\" | \"N\"
-                                             | \"O\" | \"P\" | \"Q\" | \"R\" | \"S\" | \"T\" | \"U\"
-                                             | \"V\" | \"W\" | \"X\" | \"Y\" | \"Z\" ;
-    digit = \"0\" | \"1\" | \"2\" | \"3\" | \"4\" | \"5\" | \"6\" | \"7\" | \"8\" | \"9\" ;
-    white space = ( \" \" | \"\n\" ) , { \" \" | \"\n\" } ;
-    all characters = \"H\" | \"e\" | \"l\" | \"o\" | \" \" | \"w\" | \"r\" | \"d\" | \"!\" ;
-";
-$pascalGrammar = $ebnfGrammar->parse($string);
-var_dump(true);
-
-$string =
-     "PROGRAM DEMO1\n"
-    ."BEGIN\n"
-    ."  A0:=3;\n"
-    ."  B:=45;\n"
-    ."  H:=-100023;\n"
-    ."  C:=A;\n"
-    ."  D123:=B34A;\n"
-    ."  BABOON:=GIRAFFE;\n"
-    ."  TEXT:=\"Hello world!\";\n"
-    ."END."
-;
-$pascalGrammar->parse($string);
-var_dump(true);
