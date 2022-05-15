@@ -1,11 +1,11 @@
-<?php
+<?php declare(strict_types=1);
 namespace Ferno\Loco;
 
 use PHPUnit\Framework\TestCase;
 
 final class GrammarTest extends TestCase
 {
-    public function testRegularGrammar(): void
+    public function testRegularGrammar()
     {
         $grammar = new Grammar(
             "<A>",
@@ -25,7 +25,7 @@ final class GrammarTest extends TestCase
         $this->assertEquals($grammar->parse(""), null);
     }
 
-    public function testNullStars(): void
+    public function testNullStars()
     {
         $threw = false;
         try {
@@ -57,7 +57,7 @@ final class GrammarTest extends TestCase
         $this->assertEquals($threw, true);
     }
 
-    public function testMissingRootParser(): void
+    public function testMissingRootParser()
     {
         $threw = false;
         try {
@@ -68,7 +68,7 @@ final class GrammarTest extends TestCase
         $this->assertEquals($threw, true);
     }
 
-    public function testObviousLeftRecursion(): void
+    public function testObviousLeftRecursion()
     {
         $threw = false;
         try {
@@ -84,7 +84,7 @@ final class GrammarTest extends TestCase
         $this->assertEquals($threw, true);
     }
 
-    public function testAdvancedLeftRecursion(): void
+    public function testAdvancedLeftRecursion()
     {
         // only left-recursive because <B> is nullable
         $threw = false;
@@ -109,7 +109,7 @@ final class GrammarTest extends TestCase
         $this->assertEquals($threw, true);
     }
 
-    public function testEvenMoreComplex(): void
+    public function testEvenMoreComplex()
     {
         // This specifically checks for a bug in the original Loco left-recursion check).
         // This grammar is left-recursive in A -> B -> D -> A

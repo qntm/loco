@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 // Takes a string presented in Extended Backus-Naur Form and turns it into a new Grammar
 // object capable of recognising the language described by that string.
 // http://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_Form
@@ -15,6 +15,8 @@ use Ferno\Loco\StringParser;
 use Ferno\Loco\LazyAltParser;
 use Ferno\Loco\RegexParser;
 use Ferno\Loco\GreedyMultiParser;
+use Ferno\Loco\EmptyParser;
+use Ferno\Loco\ParseFailureException;
 
 final class EbnfGrammar extends Grammar
 {
@@ -218,7 +220,7 @@ final class EbnfGrammar extends Grammar
                     $parsers[$rule["rule-name"]] = $rule["expression"];
                 }
                 if (count($parsers) === 0) {
-                    throw new Exception("No rules.");
+                    throw new ParseFailureException("No rules.");
                 }
                 return new Grammar($top, $parsers);
             }

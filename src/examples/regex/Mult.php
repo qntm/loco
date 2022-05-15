@@ -1,7 +1,9 @@
-<?php
+<?php declare(strict_types=1);
 // Each Mult consists of a multiplicand (a Charclass or a Pattern) and a Multiplier
 
 namespace Ferno\Loco\examples\regex;
+
+use Ferno\Loco\ParseFailureException;
 
 class Mult
 {

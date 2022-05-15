@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 namespace Ferno\Loco;
 
 use PHPUnit\Framework\TestCase;
@@ -6,7 +6,7 @@ use Exception;
 
 final class Utf8ParserTest extends TestCase
 {
-    public function testUtf8Parser(): void
+    public function testUtf8Parser()
     {
         $parser = new Utf8Parser(array());
 
@@ -109,7 +109,7 @@ final class Utf8ParserTest extends TestCase
         $this->assertEquals($threw, true);
     }
 
-    public function testGetBytes(): void
+    public function testGetBytes()
     {
         $this->assertEquals(Utf8Parser::getBytes(0x41), "A");
         $this->assertEquals(Utf8Parser::getBytes(0x26), "\x26");

@@ -1,11 +1,11 @@
-<?php
+<?php declare(strict_types=1);
 namespace Ferno\Loco;
 
 use PHPUnit\Framework\TestCase;
 
 final class LazyAltParserTest extends TestCase
 {
-    public function testLazyAltParser1(): void
+    public function testLazyAltParser1()
     {
         $parser = new LazyAltParser(
             array(
@@ -29,7 +29,7 @@ final class LazyAltParserTest extends TestCase
         $this->assertEquals($parser->match("0abcd", 1), array("j" => 4, "value" => "abc"));
     }
 
-    public function testLazyAltParser2(): void
+    public function testLazyAltParser2()
     {
         $threw = false;
         try {

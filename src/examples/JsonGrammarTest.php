@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 namespace Ferno\Loco\examples;
 
 use PHPUnit\Framework\TestCase;
@@ -10,12 +10,12 @@ final class JsonGrammarTest extends TestCase
 {
     private static $jsonGrammar;
 
-    public static function setUpBeforeClass(): void
+    public static function setUpBeforeClass()
     {
         self::$jsonGrammar = new JsonGrammar();
     }
 
-    public function testBasic(): void
+    public function testBasic()
     {
         $parseTree = self::$jsonGrammar->parse(
             " { \"string\" : true, \"\\\"\" : false, \"\\u9874asdh\" : [ null, { }, -9488.44E+093 ] } "
@@ -27,7 +27,7 @@ final class JsonGrammarTest extends TestCase
         $this->assertEquals($parseTree["\xE9\xA1\xB4asdh"], array(null, array(), -9.48844E+96));
     }
 
-    public function testFailureModes(): void
+    public function testFailureModes()
     {
         foreach (array(
             "{ \"string ",        // incomplete string

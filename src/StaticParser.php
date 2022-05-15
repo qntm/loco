@@ -1,10 +1,9 @@
-<?php
+<?php declare(strict_types=1);
 namespace Ferno\Loco;
 
 // Static parsers contain no internal parsers.
 abstract class StaticParser extends MonoParser
 {
-
     public function __construct($callback)
     {
         parent::__construct(array(), $callback);

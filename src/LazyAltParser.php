@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 namespace Ferno\Loco;
 
 // Takes the input parsers and applies them all in turn. "Lazy" indicates

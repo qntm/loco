@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 namespace Ferno\Loco\examples\regex;
 
 use Ferno\Loco\Grammar;
@@ -8,6 +8,7 @@ use Ferno\Loco\StringParser;
 use Ferno\Loco\LazyAltParser;
 use Ferno\Loco\EmptyParser;
 use Ferno\Loco\RegexParser;
+use Ferno\Loco\ParseFailureException;
 
 final class RegExGrammar extends Grammar
 {

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 // Takes a string presented in Backus-Naur Form and turns it into a new Grammar
 // object capable of recognising the language described by that string.
 // http://en.wikipedia.org/wiki/Backus%E2%80%93Naur_Form
@@ -13,6 +13,7 @@ use Ferno\Loco\StringParser;
 use Ferno\Loco\GreedyStarParser;
 use Ferno\Loco\RegexParser;
 use Ferno\Loco\EmptyParser;
+use Ferno\Loco\ParseFailureException;
 
 final class BnfGrammar extends Grammar
 {
@@ -172,7 +173,7 @@ final class BnfGrammar extends Grammar
                     $parsers[$rule["rule-name"]] = $rule["expression"];
                 }
                 if (count($parsers) === 0) {
-                    throw new Exception("No rules.");
+                    throw new ParseFailureException("No rules.");
                 }
                 return new Grammar($top, $parsers);
             }

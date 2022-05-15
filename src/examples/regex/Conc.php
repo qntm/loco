@@ -1,7 +1,9 @@
-<?php
+<?php declare(strict_types=1);
 // Each Conc is a concatenation of several "Mults"
 
 namespace Ferno\Loco\examples\regex;
+
+use Ferno\Loco\ParseFailureException;
 
 class Conc
 {

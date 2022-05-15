@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 namespace Ferno\Loco\examples;
 
 use PHPUnit\Framework\TestCase;
@@ -8,12 +8,12 @@ final class SimpleCommentGrammarTest extends TestCase
 {
     private static $simpleCommentGrammar;
 
-    public static function setUpBeforeClass(): void
+    public static function setUpBeforeClass()
     {
         self::$simpleCommentGrammar = new SimpleCommentGrammar();
     }
 
-    public function testSuccess(): void
+    public function testSuccess()
     {
         $this->assertEquals(
             self::$simpleCommentGrammar->parse(
@@ -23,7 +23,7 @@ final class SimpleCommentGrammarTest extends TestCase
         );
     }
 
-    public function testFailure(): void
+    public function testFailure()
     {
         foreach (array(
             "<h5 style=\"\">", // rogue "style" attribute

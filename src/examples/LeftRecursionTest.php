@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 # Left-recursion in Loco, demonstration.
 
 # Left-recursive grammars cannot be parsed using a recursive descent approach.
@@ -18,7 +18,7 @@ use Ferno\Loco\GreedyStarParser;
 
 final class LeftRecursionTest extends TestCase
 {
-    public function testLeftRecursion(): void
+    public function testLeftRecursion()
     {
         # N -> number
         $N = new RegexParser(

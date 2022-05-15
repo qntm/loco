@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 // Takes a string presented in Extended Backus-Naur Form and turns it into a new Grammar
 // object capable of recognising the language described by that string.
 // http://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_Form
@@ -12,7 +12,7 @@ final class EbnfGrammarTest extends TestCase
 {
     private static $ebnfGrammar;
 
-    public static function setUpBeforeClass(): void
+    public static function setUpBeforeClass()
     {
         self::$ebnfGrammar = new EbnfGrammar();
     }
@@ -20,13 +20,13 @@ final class EbnfGrammarTest extends TestCase
     /**
      * @doesNotPerformAssertions
      */
-    public function testBasic(): void
+    public function testBasic()
     {
         $string = "a = 'PROGRAM' ;";
         self::$ebnfGrammar->parse($string)->parse("PROGRAM");
     }
 
-    public function testFailure(): void
+    public function testFailure()
     {
         $string = "a = 'PROGRAM ;";
         $threw = false;
@@ -41,7 +41,7 @@ final class EbnfGrammarTest extends TestCase
     /**
      * @doesNotPerformAssertions
      */
-    public function testFullRuleSet(): void
+    public function testFullRuleSet()
     {
         $string = "
             (* a simple program syntax in EBNF - Wikipedia *)

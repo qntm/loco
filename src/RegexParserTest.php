@@ -1,11 +1,11 @@
-<?php
+<?php declare(strict_types=1);
 namespace Ferno\Loco;
 
 use PHPUnit\Framework\TestCase;
 
 final class RegexParserTest extends TestCase
 {
-    public function testImproperAnchoring(): void
+    public function testImproperAnchoring()
     {
         $threw = false;
         try {
@@ -16,7 +16,7 @@ final class RegexParserTest extends TestCase
         $this->assertEquals($threw, true);
     }
 
-    public function testRegexParser(): void
+    public function testRegexParser()
     {
         $parser = new RegexParser("#^boo#");
         $this->assertEquals($parser->match("boo", 0), array("j" => 3, "value" => "boo"));

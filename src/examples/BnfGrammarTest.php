@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 namespace Ferno\Loco\examples;
 
 use PHPUnit\Framework\TestCase;
@@ -8,7 +8,7 @@ final class BnfGrammarTest extends TestCase
 {
     private static $bnfGrammar;
 
-    public static function setUpBeforeClass(): void
+    public static function setUpBeforeClass()
     {
         self::$bnfGrammar = new BnfGrammar();
     }
@@ -16,7 +16,7 @@ final class BnfGrammarTest extends TestCase
     /**
      * @doesNotPerformAssertions
      */
-    public function testFullRuleSet(): void
+    public function testFullRuleSet()
     {
         $string = "
             <postal-address> ::= <name-part> <street-address> <zip-part>
@@ -47,7 +47,7 @@ final class BnfGrammarTest extends TestCase
     /**
      * @doesNotPerformAssertions
      */
-    public function testSelfReference(): void
+    public function testSelfReference()
     {
         $string = "
             <syntax>     ::= <rule> | <rule> <syntax>
@@ -69,7 +69,7 @@ final class BnfGrammarTest extends TestCase
         $grammar3->parse(" <a> ::= 'b' \n");
     }
 
-    public function testFailure(): void
+    public function testFailure()
     {
         $threw = false;
         $string = " <incomplete ::=";

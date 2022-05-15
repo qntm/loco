@@ -1,11 +1,11 @@
-<?php
+<?php declare(strict_types=1);
 namespace Ferno\Loco;
 
 use PHPUnit\Framework\TestCase;
 
 final class GreedyMultiParserTest extends TestCase
 {
-    public function testGreedyMultiParser(): void
+    public function testGreedyMultiParser()
     {
         $parser = new GreedyMultiParser(new StringParser("a"), 0, null);
         $this->assertEquals($parser->match("", 0), array("j" => 0, "value" => array()));
@@ -14,7 +14,7 @@ final class GreedyMultiParserTest extends TestCase
         $this->assertEquals($parser->match("aaa", 0), array("j" => 3, "value" => array("a", "a", "a")));
     }
 
-    public function testAmbiguousInnerParser(): void
+    public function testAmbiguousInnerParser()
     {
         $parser = new GreedyMultiParser(
             new LazyAltParser(
@@ -32,7 +32,7 @@ final class GreedyMultiParserTest extends TestCase
         $this->assertEquals($parser->match("ab", 0), array("j" => 2, "value" => array("ab")));
     }
 
-    public function test10D(): void
+    public function test10D()
     {
         $parser = new GreedyMultiParser(
             new LazyAltParser(
@@ -49,14 +49,14 @@ final class GreedyMultiParserTest extends TestCase
         $this->assertEquals($parser->match("aa", 0), array("j" => 2, "value" => array("aa")));
     }
 
-    public function test10E(): void
+    public function test10E()
     {
         $parser = new GreedyMultiParser(new StringParser("a"), 0, 1);
         $this->assertEquals($parser->match("", 0), array("j" => 0, "value" => array()));
         $this->assertEquals($parser->match("a", 0), array("j" => 1, "value" => array("a")));
     }
 
-    public function test10F(): void
+    public function test10F()
     {
         $parser = new GreedyMultiParser(new StringParser("f"), 0, 0);
         $this->assertEquals($parser->match("", 0), array("j" => 0, "value" => array()));

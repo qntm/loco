@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 namespace Ferno\Loco;
 
 // Grammar is a container for a bunch of parsers. This container is
@@ -7,7 +7,6 @@ namespace Ferno\Loco;
 // useless strings.
 class Grammar extends MonoParser
 {
-
     // All parsing begins with the parser of this name.
     // $S should not be an actual parser
     private $S;

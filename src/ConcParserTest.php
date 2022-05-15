@@ -1,11 +1,11 @@
-<?php
+<?php declare(strict_types=1);
 namespace Ferno\Loco;
 
 use PHPUnit\Framework\TestCase;
 
 final class ConcParserTest extends TestCase
 {
-    public function testConcParser(): void
+    public function testConcParser()
     {
         $parser = new ConcParser(
             array(

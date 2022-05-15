@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 namespace Ferno\Loco\examples\regex;
 
 use PHPUnit\Framework\TestCase;
@@ -9,7 +9,7 @@ final class RegExGrammarTest extends TestCase
 {
     private static $regexGrammar;
 
-    public static function setUpBeforeClass(): void
+    public static function setUpBeforeClass()
     {
         self::$regexGrammar = new RegExGrammar();
     }
@@ -17,7 +17,7 @@ final class RegExGrammarTest extends TestCase
     /**
      * @doesNotPerformAssertions
      */
-    public function testAll(): void
+    public function testAll()
     {
         foreach (array(
             "a{2}",

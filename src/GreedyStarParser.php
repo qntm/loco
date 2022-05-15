@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 namespace Ferno\Loco;
 
 // Tiny subclass is ironically much more useful than GreedyMultiParser

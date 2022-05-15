@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 namespace Ferno\Loco;
 
 // Callback accepts a single argument containing all submatches, however many

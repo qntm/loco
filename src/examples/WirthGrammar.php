@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 // Takes a string presented in Wirth syntax notation and turn it into a new
 // Grammar object capable of recognising the language described by that string.
 // http://en.wikipedia.org/wiki/Wirth_syntax_notation
@@ -12,6 +12,7 @@ use Ferno\Loco\StringParser;
 use Ferno\Loco\GreedyMultiParser;
 use Ferno\Loco\LazyAltParser;
 use Ferno\Loco\RegexParser;
+use Ferno\Loco\ParseFailureException;
 
 final class WirthGrammar extends Grammar
 {
@@ -162,7 +163,7 @@ final class WirthGrammar extends Grammar
                     $parsers[$production["identifier"]] = $production["expression"];
                 }
                 if (count($parsers) === 0) {
-                    throw new Exception("No rules.");
+                    throw new ParseFailureException("No rules.");
                 }
                 return new Grammar($top, $parsers);
             }

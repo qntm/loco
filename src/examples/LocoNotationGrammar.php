@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 // Takes a string presented in Loco Backus-Naur Form and turns it into a
 // new Grammar object capable of recognising the language described by that string.
 

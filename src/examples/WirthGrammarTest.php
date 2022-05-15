@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 namespace Ferno\Loco\examples;
 
 use PHPUnit\Framework\TestCase;
@@ -7,7 +7,7 @@ final class WirthGrammarTest extends TestCase
 {
     private static $wirthGrammar;
 
-    public static function setUpBeforeClass(): void
+    public static function setUpBeforeClass()
     {
         self::$wirthGrammar = new WirthGrammar();
     }
@@ -15,7 +15,7 @@ final class WirthGrammarTest extends TestCase
     /**
      * @doesNotPerformAssertions
      */
-    public function testWith(): void
+    public function testWith()
     {
         // This is the syntax for Wirth syntax notation except it lacks whitespace
         $string = "

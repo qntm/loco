@@ -1,7 +1,9 @@
-<?php
+<?php declare(strict_types=1);
 // A Charclass is a set of characters, possibly negated.
 
 namespace Ferno\Loco\examples\regex;
+
+use Ferno\Loco\ParseFailureException;
 
 class Charclass
 {
@@ -11,10 +13,10 @@ class Charclass
     public function __construct($chars, $negateMe = false)
     {
         if (!is_string($chars)) {
-            throw new Exception("Not a string: ".var_export($chars, true));
+            throw new ParseFailureException("Not a string: ".var_export($chars, true));
         }
         if (!is_bool($negateMe)) {
-            throw new Exception("Not a boolean: ".var_export($negateMe, true));
+            throw new ParseFailureException("Not a boolean: ".var_export($negateMe, true));
         }
         for ($i = 0; $i < strlen($chars); $i++) {
             $char = $chars[$i];
@@ -32,7 +34,7 @@ class Charclass
             if ($this->negateMe) {
                 return ".";
             }
-            throw new Exception("What");
+            throw new ParseFailureException("What");
         }
 
         if (count($this->chars) === 1 && $this->negateMe === false) {

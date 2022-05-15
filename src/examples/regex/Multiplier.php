@@ -1,9 +1,11 @@
-<?php
+<?php declare(strict_types=1);
 // A Multiplier consists of a non-negative integer lower bound and a non-negative
 // integer upper bound greater than or equal to the lower bound.
 // The upper bound can also be null (infinity)
 
 namespace Ferno\Loco\examples\regex;
+
+use Ferno\Loco\ParseFailureException;
 
 class Multiplier
 {
@@ -13,13 +15,13 @@ class Multiplier
     public function __construct($lower, $upper)
     {
         if (!is_int($lower)) {
-            throw new Exception("Not an integer: ".var_export($lower, true));
+            throw new ParseFailureException("Not an integer: ".var_export($lower, true));
         }
         if (!is_int($upper) && $upper !== null) {
-            throw new Exception("Not an integer or null: ".var_export($upper, true));
+            throw new ParseFailureException("Not an integer or null: ".var_export($upper, true));
         }
         if ($upper !== null && !($lower <= $upper)) {
-            throw new Exception("Upper: ".var_export($upper, true)." is less than lower: ".var_export($lower, true));
+            throw new ParseFailureException("Upper: ".var_export($upper, true)." is less than lower: ".var_export($lower, true));
         }
         $this->lower = $lower;
         $this->upper = $upper;

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 namespace Ferno\Loco\examples;
 
 use PHPUnit\Framework\TestCase;
@@ -8,26 +8,26 @@ final class LocoNotationGrammarTest extends TestCase
 {
     private static $locoGrammar;
 
-    public static function setUpBeforeClass(): void
+    public static function setUpBeforeClass()
     {
         self::$locoGrammar = new LocoNotationGrammar();
     }
 
-    public function testBasic(): void
+    public function testBasic()
     {
         // array("a") or new S("a")
         $grammar2 = self::$locoGrammar->parse(" S ::= 'a' ");
         $this->assertEquals($grammar2->parse("a"), array("a"));
     }
 
-    public function testConcatenation(): void
+    public function testConcatenation()
     {
         // array("a", "b") or new S("a", "b")
         $grammar2 = self::$locoGrammar->parse(" S ::= 'a' 'b' ");
         $this->assertEquals($grammar2->parse("ab"), array("a", "b"));
     }
 
-    public function testAlternation(): void
+    public function testAlternation()
     {
         // array("a") or array("b") or new S("a") or new S("b")
         $grammar2 = self::$locoGrammar->parse(" S ::= 'a' | 'b' ");
@@ -35,7 +35,7 @@ final class LocoNotationGrammarTest extends TestCase
         $this->assertEquals($grammar2->parse("b"), array("b"));
     }
 
-    public function testAlternation2(): void
+    public function testAlternation2()
     {
         // array("a") or array("b", "c") or new S("a") or new S("b", "c")
         $grammar2 = self::$locoGrammar->parse(" S ::= 'a' | 'b' 'c' ");
@@ -43,28 +43,28 @@ final class LocoNotationGrammarTest extends TestCase
         $this->assertEquals($grammar2->parse("bc"), array("b", "c"));
     }
 
-    public function testSubParsers(): void
+    public function testSubParsers()
     {
         // array(array("a") or new S(array("a"))
         $grammar2 = self::$locoGrammar->parse(" S ::= ('a') ");
         $this->assertEquals($grammar2->parse("a"), array(array("a")));
     }
 
-    public function testSa(): void
+    public function testSa()
     {
         // new S(new A("a"))
         $grammar1 = self::$locoGrammar->parse(" S ::= A \n A ::= 'a' ");
         $this->assertEquals($grammar1->parse("a"), array(array("a")));
     }
 
-    public function testSab(): void
+    public function testSab()
     {
         // new S(new A("a", "b"))
         $grammar1 = self::$locoGrammar->parse(" S ::= A \n A ::= 'a' 'b' ");
         $this->assertEquals($grammar1->parse("ab"), array(array("a", "b")));
     }
 
-    public function testQuestionMarkMultiplier(): void
+    public function testQuestionMarkMultiplier()
     {
 
         // new S("a") or new S()
@@ -83,7 +83,7 @@ final class LocoNotationGrammarTest extends TestCase
         $this->assertEquals($grammar4->parse(""), array(array()));
     }
 
-    public function testStarParser(): void
+    public function testStarParser()
     {
 
         // new S("a", "a", ...)
@@ -112,7 +112,7 @@ final class LocoNotationGrammarTest extends TestCase
         $this->assertEquals($grammar3->parse(""), array(array()));
     }
 
-    public function testPlusParser(): void
+    public function testPlusParser()
     {
         // new S(array("a", "a", ...))
         // new S(new APlus("a", "a", ...))
@@ -166,7 +166,7 @@ final class LocoNotationGrammarTest extends TestCase
         $this->assertEquals($threw, true);
     }
 
-    public function testRegexes(): void
+    public function testRegexes()
     {
         $grammar1 = self::$locoGrammar->parse(" S ::= /(ab)*/ ");
         $this->assertEquals($grammar1->parse("ababab"), array("ababab"));
@@ -182,19 +182,19 @@ final class LocoNotationGrammarTest extends TestCase
         $this->assertEquals($threw, true);
     }
 
-    public function testLiteralSlash(): void
+    public function testLiteralSlash()
     {
         $grammar1 = self::$locoGrammar->parse(" S ::= /\\// ");
         $this->assertEquals($grammar1->parse("/"), array("/"));
     }
 
-    public function testLiteralBackslash(): void
+    public function testLiteralBackslash()
     {
         $grammar1 = self::$locoGrammar->parse(" S ::= /\\\\/ ");
         $this->assertEquals($grammar1->parse("\\"), array("\\"));
     }
 
-    public function testDot(): void
+    public function testDot()
     {
         $grammar1 = self::$locoGrammar->parse(" S ::= . ");
 
@@ -292,7 +292,7 @@ final class LocoNotationGrammarTest extends TestCase
         $this->assertEquals($threw, true);
     }
 
-    public function testUtf8Long(): void
+    public function testUtf8Long()
     {
         $grammar1 = self::$locoGrammar->parse(" S ::= [^& <>\\]] ");
         $this->assertEquals($grammar1->parse("A"), array("A"));
@@ -340,7 +340,7 @@ final class LocoNotationGrammarTest extends TestCase
         $this->assertEquals($threw, true);
     }
 
-    public function testTwoRules(): void
+    public function testTwoRules()
     {
         $grammar2 = self::$locoGrammar->parse("
             unicode ::= 'a' '' b | 'grammar' '\\'' '\\\\' \"\\\"\"
@@ -350,7 +350,7 @@ final class LocoNotationGrammarTest extends TestCase
         $this->assertEquals($result, array("grammar", "'", "\\", "\""));
     }
 
-    public function testBracketMatching(): void
+    public function testBracketMatching()
     {
         $bracketMatchGrammar = self::$locoGrammar->parse("
             S          ::= expression *
@@ -385,7 +385,7 @@ final class LocoNotationGrammarTest extends TestCase
         }
     }
 
-    public function testFullJson(): void
+    public function testFullJson()
     {
         // Full rules for recognising JSON
         $jsonGrammar = self::$locoGrammar->parse("
@@ -435,7 +435,7 @@ final class LocoNotationGrammarTest extends TestCase
         }
     }
 
-    public function testQntmComments(): void
+    public function testQntmComments()
     {
         $simpleCommentGrammar = self::$locoGrammar->parse("
             comment    ::= whitespace block*
