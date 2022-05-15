@@ -21,4 +21,5 @@ jobs:
         php-version: '${{ matrix.php-versions }}'
     - name: 'Actual composer tasks'
       run: |
+        composer install
         composer run-script test
