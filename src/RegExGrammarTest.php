@@ -1,18 +1,25 @@
 <?php
-use PHPUnit\Framework\TestCase;
+namespace Ferno\Loco;
 
-require_once __DIR__ . '/RegExGrammar.php';
+use PHPUnit\Framework\TestCase;
+use Ferno\Loco\RegExGrammar;
 
 // apologies for the relative lack of exhaustive unit tests
 
 final class RegExGrammarTest extends TestCase
 {
+    private static $regexGrammar;
+
+    public static function setUpBeforeClass(): void
+    {
+        self::$regexGrammar = new RegExGrammar();
+    }
+
     /**
      * @doesNotPerformAssertions
      */
     public function testAll(): void
     {
-        global $regexGrammar;
         foreach (array(
             "a{2}",
             "a{2,}",
@@ -37,7 +44,7 @@ final class RegExGrammarTest extends TestCase
             "[$%\\^]{2}",
             ""
         ) as $string) {
-            $pattern = $regexGrammar->parse($string);
+            $pattern = self::$regexGrammar->parse($string);
         }
     }
 }

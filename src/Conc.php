@@ -1,5 +1,8 @@
 <?php
 // Each Conc is a concatenation of several "Mults"
+
+namespace Ferno\Loco;
+
 class Conc
 {
     public $mults;
@@ -7,8 +10,8 @@ class Conc
     public function __construct($mults)
     {
         foreach ($mults as $mult) {
-            if (!is_a($mult, "Mult")) {
-                throw new Exception("Not a Mult: ".var_export($mult, true));
+            if (!($mult instanceof Mult)) {
+                throw new ParseFailureException("Not a Mult: ".var_export($mult, true));
             }
         }
         $this->mults = $mults;

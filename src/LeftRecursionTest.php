@@ -5,16 +5,16 @@
 # Loco detects left-recursion in a new grammar and raises an exception.
 # How do we get around this?
 
-use PHPUnit\Framework\TestCase;
+namespace Ferno\Loco;
 
-require_once __DIR__ . '/../src/Loco.php';
+use PHPUnit\Framework\TestCase;
 
 final class LeftRecursionTest extends TestCase
 {
     public function testLeftRecursion(): void
     {
         # N -> number
-        $N = new Ferno\Loco\RegexParser(
+        $N = new RegexParser(
             "#^(0|[1-9][0-9]*)#",
             function ($match) {
                 return (int) $match;
@@ -22,8 +22,8 @@ final class LeftRecursionTest extends TestCase
         );
 
         # P -> "-" N
-        $P = new Ferno\Loco\ConcParser(
-            array(new Ferno\Loco\StringParser("-"), $N),
+        $P = new ConcParser(
+            array(new StringParser("-"), $N),
             function ($minus, $n) {
                 return $n;
             }
@@ -35,13 +35,13 @@ final class LeftRecursionTest extends TestCase
         try {
             # S -> N
             # S -> S P
-            $grammar = new Ferno\Loco\Grammar(
+            $grammar = new Grammar(
                 "S",
                 array(
-                    "S" => new Ferno\Loco\LazyAltParser(
+                    "S" => new LazyAltParser(
                         array(
                             "N",
-                            new Ferno\Loco\ConcParser(
+                            new ConcParser(
                                 array("S", "P"),
                                 "minus"
                             )
@@ -51,7 +51,7 @@ final class LeftRecursionTest extends TestCase
                     "N" => $N
                 )
             );
-        } catch (Ferno\Loco\GrammarException $e) {
+        } catch (GrammarException $e) {
             # Left-recursive in S
             $threw = true;
         }
@@ -59,13 +59,13 @@ final class LeftRecursionTest extends TestCase
 
         # Fix the grammar like so:
         # S -> N P*
-        $grammar = new Ferno\Loco\Grammar(
+        $grammar = new Grammar(
             "S",
             array(
-                "S" => new Ferno\Loco\ConcParser(
+                "S" => new ConcParser(
                     array(
                         $N,
-                        new Ferno\Loco\GreedyStarParser("P")
+                        new GreedyStarParser("P")
                     ),
                     function ($n, $ps) {
                         # clever bit

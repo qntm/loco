@@ -1,31 +1,36 @@
 <?php
-use PHPUnit\Framework\TestCase;
+namespace Ferno\Loco;
 
-require_once __DIR__ . '/LocoNotationGrammar.php';
+use PHPUnit\Framework\TestCase;
+use Ferno\Loco\LocoNotationGrammar;
 
 final class LocoNotationGrammarTest extends TestCase
 {
+    private static $locoGrammar;
+
+    public static function setUpBeforeClass(): void
+    {
+        self::$locoGrammar = new LocoNotationGrammar();
+    }
+
     public function testBasic(): void
     {
         // array("a") or new S("a")
-        global $locoGrammar;
-        $grammar2 = $locoGrammar->parse(" S ::= 'a' ");
+        $grammar2 = self::$locoGrammar->parse(" S ::= 'a' ");
         $this->assertEquals($grammar2->parse("a"), array("a"));
     }
 
     public function testConcatenation(): void
     {
         // array("a", "b") or new S("a", "b")
-        global $locoGrammar;
-        $grammar2 = $locoGrammar->parse(" S ::= 'a' 'b' ");
+        $grammar2 = self::$locoGrammar->parse(" S ::= 'a' 'b' ");
         $this->assertEquals($grammar2->parse("ab"), array("a", "b"));
     }
 
     public function testAlternation(): void
     {
         // array("a") or array("b") or new S("a") or new S("b")
-        global $locoGrammar;
-        $grammar2 = $locoGrammar->parse(" S ::= 'a' | 'b' ");
+        $grammar2 = self::$locoGrammar->parse(" S ::= 'a' | 'b' ");
         $this->assertEquals($grammar2->parse("a"), array("a"));
         $this->assertEquals($grammar2->parse("b"), array("b"));
     }
@@ -33,8 +38,7 @@ final class LocoNotationGrammarTest extends TestCase
     public function testAlternation2(): void
     {
         // array("a") or array("b", "c") or new S("a") or new S("b", "c")
-        global $locoGrammar;
-        $grammar2 = $locoGrammar->parse(" S ::= 'a' | 'b' 'c' ");
+        $grammar2 = self::$locoGrammar->parse(" S ::= 'a' | 'b' 'c' ");
         $this->assertEquals($grammar2->parse("a"), array("a"));
         $this->assertEquals($grammar2->parse("bc"), array("b", "c"));
     }
@@ -42,37 +46,33 @@ final class LocoNotationGrammarTest extends TestCase
     public function testSubParsers(): void
     {
         // array(array("a") or new S(array("a"))
-        global $locoGrammar;
-        $grammar2 = $locoGrammar->parse(" S ::= ('a') ");
+        $grammar2 = self::$locoGrammar->parse(" S ::= ('a') ");
         $this->assertEquals($grammar2->parse("a"), array(array("a")));
     }
 
     public function testSa(): void
     {
         // new S(new A("a"))
-        global $locoGrammar;
-        $grammar1 = $locoGrammar->parse(" S ::= A \n A ::= 'a' ");
+        $grammar1 = self::$locoGrammar->parse(" S ::= A \n A ::= 'a' ");
         $this->assertEquals($grammar1->parse("a"), array(array("a")));
     }
 
     public function testSab(): void
     {
         // new S(new A("a", "b"))
-        global $locoGrammar;
-        $grammar1 = $locoGrammar->parse(" S ::= A \n A ::= 'a' 'b' ");
+        $grammar1 = self::$locoGrammar->parse(" S ::= A \n A ::= 'a' 'b' ");
         $this->assertEquals($grammar1->parse("ab"), array(array("a", "b")));
     }
 
     public function testQuestionMarkMultiplier(): void
     {
-        global $locoGrammar;
 
         // new S("a") or new S()
-        $grammar1 = $locoGrammar->parse(" S ::= 'a'? ");
-        $grammar2 = $locoGrammar->parse(" S ::= 'a' | ");
+        $grammar1 = self::$locoGrammar->parse(" S ::= 'a'? ");
+        $grammar2 = self::$locoGrammar->parse(" S ::= 'a' | ");
         // new S(new AQ("a")) or new S(new AQ())
-        $grammar3 = $locoGrammar->parse(" S ::= ( 'a' | ) ");
-        $grammar4 = $locoGrammar->parse(" S ::= AQ \n AQ ::= 'a' | ");
+        $grammar3 = self::$locoGrammar->parse(" S ::= ( 'a' | ) ");
+        $grammar4 = self::$locoGrammar->parse(" S ::= AQ \n AQ ::= 'a' | ");
         $this->assertEquals($grammar1->parse("a"), array(array("a")));
         $this->assertEquals($grammar2->parse("a"), array("a"));
         $this->assertEquals($grammar3->parse("a"), array(array("a")));
@@ -85,16 +85,15 @@ final class LocoNotationGrammarTest extends TestCase
 
     public function testStarParser(): void
     {
-        global $locoGrammar;
 
         // new S("a", "a", ...)
         // array("a", "a", ...)
-        $grammar1 = $locoGrammar->parse(" S ::= 'a'* ");
-        $grammar4 = $locoGrammar->parse(" S ::= 'a' 'a' 'a' | 'a' 'a' | 'a' | ");
+        $grammar1 = self::$locoGrammar->parse(" S ::= 'a'* ");
+        $grammar4 = self::$locoGrammar->parse(" S ::= 'a' 'a' 'a' | 'a' 'a' | 'a' | ");
         // new S(array("a", "a", ...))
         // new S(new AStar("a", "a", ...))
-        $grammar2 = $locoGrammar->parse(" S ::= ( 'a' 'a' 'a' | 'a' 'a' | 'a' | ) ");
-        $grammar3 = $locoGrammar->parse(" S ::= AStar \n AStar ::= 'a' 'a' 'a' | 'a' 'a' | 'a' | ");
+        $grammar2 = self::$locoGrammar->parse(" S ::= ( 'a' 'a' 'a' | 'a' 'a' | 'a' | ) ");
+        $grammar3 = self::$locoGrammar->parse(" S ::= AStar \n AStar ::= 'a' 'a' 'a' | 'a' 'a' | 'a' | ");
         $this->assertEquals($grammar1->parse("aaa"), array(array("a", "a", "a")));
         $this->assertEquals($grammar4->parse("aaa"), array("a", "a", "a"));
         $this->assertEquals($grammar2->parse("aaa"), array(array("a", "a", "a")));
@@ -115,14 +114,12 @@ final class LocoNotationGrammarTest extends TestCase
 
     public function testPlusParser(): void
     {
-        global $locoGrammar;
-
         // new S(array("a", "a", ...))
         // new S(new APlus("a", "a", ...))
-        $grammar1 = $locoGrammar->parse(" S ::= 'a'+ ");
-        $grammar4 = $locoGrammar->parse(" S ::= 'a' 'a' 'a' | 'a' 'a' | 'a' ");
-        $grammar2 = $locoGrammar->parse(" S ::= ( 'a' 'a' 'a' | 'a' 'a' | 'a' ) ");
-        $grammar3 = $locoGrammar->parse(" S ::= APlus \n APlus ::= 'a' 'a' 'a' | 'a' 'a' | 'a' ");
+        $grammar1 = self::$locoGrammar->parse(" S ::= 'a'+ ");
+        $grammar4 = self::$locoGrammar->parse(" S ::= 'a' 'a' 'a' | 'a' 'a' | 'a' ");
+        $grammar2 = self::$locoGrammar->parse(" S ::= ( 'a' 'a' 'a' | 'a' 'a' | 'a' ) ");
+        $grammar3 = self::$locoGrammar->parse(" S ::= APlus \n APlus ::= 'a' 'a' 'a' | 'a' 'a' | 'a' ");
         $this->assertEquals($grammar1->parse("aaa"), array(array("a", "a", "a")));
         $this->assertEquals($grammar4->parse("aaa"), array("a", "a", "a"));
         $this->assertEquals($grammar2->parse("aaa"), array(array("a", "a", "a")));
@@ -139,7 +136,7 @@ final class LocoNotationGrammarTest extends TestCase
         $threw = false;
         try {
             $grammar1->parse("");
-        } catch (Ferno\Loco\ParseFailureException $e) {
+        } catch (ParseFailureException $e) {
             $threw = true;
         }
         $this->assertEquals($threw, true);
@@ -147,7 +144,7 @@ final class LocoNotationGrammarTest extends TestCase
         $threw = false;
         try {
             $grammar4->parse("");
-        } catch (Ferno\Loco\ParseFailureException $e) {
+        } catch (ParseFailureException $e) {
             $threw = true;
         }
         $this->assertEquals($threw, true);
@@ -155,7 +152,7 @@ final class LocoNotationGrammarTest extends TestCase
         $threw = false;
         try {
             $grammar2->parse("");
-        } catch (Ferno\Loco\ParseFailureException $e) {
+        } catch (ParseFailureException $e) {
             $threw = true;
         }
         $this->assertEquals($threw, true);
@@ -163,7 +160,7 @@ final class LocoNotationGrammarTest extends TestCase
         $threw = false;
         try {
             $grammar3->parse("");
-        } catch (Ferno\Loco\ParseFailureException $e) {
+        } catch (ParseFailureException $e) {
             $threw = true;
         }
         $this->assertEquals($threw, true);
@@ -171,17 +168,15 @@ final class LocoNotationGrammarTest extends TestCase
 
     public function testRegexes(): void
     {
-        global $locoGrammar;
-
-        $grammar1 = $locoGrammar->parse(" S ::= /(ab)*/ ");
+        $grammar1 = self::$locoGrammar->parse(" S ::= /(ab)*/ ");
         $this->assertEquals($grammar1->parse("ababab"), array("ababab"));
-        $grammar = $locoGrammar->parse(" number ::= /a\\.b/ ");
+        $grammar = self::$locoGrammar->parse(" number ::= /a\\.b/ ");
         $this->assertEquals($grammar->parse("a.b"), array("a.b"));
 
         $threw = false;
         try {
             $grammar1->parse("aXb");
-        } catch (Ferno\Loco\ParseFailureException $e) {
+        } catch (ParseFailureException $e) {
             $threw = true;
         }
         $this->assertEquals($threw, true);
@@ -189,44 +184,53 @@ final class LocoNotationGrammarTest extends TestCase
 
     public function testLiteralSlash(): void
     {
-        global $locoGrammar;
-        $grammar1 = $locoGrammar->parse(" S ::= /\\// ");
+        $grammar1 = self::$locoGrammar->parse(" S ::= /\\// ");
         $this->assertEquals($grammar1->parse("/"), array("/"));
     }
 
     public function testLiteralBackslash(): void
     {
-        global $locoGrammar;
-        $grammar1 = $locoGrammar->parse(" S ::= /\\\\/ ");
+        $grammar1 = self::$locoGrammar->parse(" S ::= /\\\\/ ");
         $this->assertEquals($grammar1->parse("\\"), array("\\"));
     }
 
     public function testDot(): void
     {
-        global $locoGrammar;
-
-        $grammar1 = $locoGrammar->parse(" S ::= . ");
+        $grammar1 = self::$locoGrammar->parse(" S ::= . ");
 
         $threw = false;
         try {
             $grammar1->parse("");
-        } catch (Ferno\Loco\ParseFailureException $e) {
+        } catch (ParseFailureException $e) {
             $threw = true;
         }
         $this->assertEquals($threw, true);
 
-        $this->assertEquals($grammar1->parse("\x41"), array("\x41")); # 1-byte character "A"
-        $this->assertEquals($grammar1->parse("\xC2\xAF"), array("\xC2\xAF")); # 2-byte character "�"
-        $this->assertEquals($grammar1->parse("\xE2\x99\xA5"), array("\xE2\x99\xA5")); # 3-byte character "?"
-        $this->assertEquals($grammar1->parse("\xF1\x8B\x81\x82"), array("\xF1\x8B\x81\x82")); # 4-byte character "??"
-        $this->assertEquals($grammar1->parse("\xEF\xBB\xBF"), array("\xEF\xBB\xBF")); # "byte order mark" 11101111 10111011 10111111 (U+FEFF)
-        $this->assertEquals($grammar1->parse("\xF0\x90\x80\x80"), array("\xF0\x90\x80\x80")); # 4-byte character
-        $this->assertEquals($grammar1->parse("\xF0\xA0\x80\x80"), array("\xF0\xA0\x80\x80")); # 4-byte character
+        # 1-byte character "A"
+        $this->assertEquals($grammar1->parse("\x41"), array("\x41"));
+
+        # 2-byte character "�"
+        $this->assertEquals($grammar1->parse("\xC2\xAF"), array("\xC2\xAF"));
+
+        # 3-byte character "?"
+        $this->assertEquals($grammar1->parse("\xE2\x99\xA5"), array("\xE2\x99\xA5"));
+
+        # 4-byte character "??"
+        $this->assertEquals($grammar1->parse("\xF1\x8B\x81\x82"), array("\xF1\x8B\x81\x82"));
+
+        # "byte order mark" 11101111 10111011 10111111 (U+FEFF)
+        $this->assertEquals($grammar1->parse("\xEF\xBB\xBF"), array("\xEF\xBB\xBF"));
+
+        # 4-byte character
+        $this->assertEquals($grammar1->parse("\xF0\x90\x80\x80"), array("\xF0\x90\x80\x80"));
+
+        # 4-byte character
+        $this->assertEquals($grammar1->parse("\xF0\xA0\x80\x80"), array("\xF0\xA0\x80\x80"));
 
         $threw = false;
         try {
             $grammar1->parse("\xF4\x90\x80\x80"); # code point U+110000, out of range (max is U+10FFFF)
-        } catch (Ferno\Loco\ParseFailureException $e) {
+        } catch (ParseFailureException $e) {
             $threw = true;
         }
         $this->assertEquals($threw, true);
@@ -234,7 +238,7 @@ final class LocoNotationGrammarTest extends TestCase
         $threw = false;
         try {
             $grammar1->parse("\xC0\xA6"); # overlong encoding (code point is U+26; should be 1 byte, "\x26")
-        } catch (Ferno\Loco\ParseFailureException $e) {
+        } catch (ParseFailureException $e) {
             $threw = true;
         }
         $this->assertEquals($threw, true);
@@ -242,7 +246,7 @@ final class LocoNotationGrammarTest extends TestCase
         $threw = false;
         try {
             $grammar1->parse("\xC3\xFF"); # illegal continuation byte
-        } catch (Ferno\Loco\ParseFailureException $e) {
+        } catch (ParseFailureException $e) {
             $threw = true;
         }
         $this->assertEquals($threw, true);
@@ -250,7 +254,7 @@ final class LocoNotationGrammarTest extends TestCase
         $threw = false;
         try {
             $grammar1->parse("\xFF"); # illegal leading byte
-        } catch (Ferno\Loco\ParseFailureException $e) {
+        } catch (ParseFailureException $e) {
             $threw = true;
         }
         $this->assertEquals($threw, true);
@@ -258,7 +262,7 @@ final class LocoNotationGrammarTest extends TestCase
         $threw = false;
         try {
             $grammar1->parse("\xC2"); # mid-character termination
-        } catch (Ferno\Loco\ParseFailureException $e) {
+        } catch (ParseFailureException $e) {
             $threw = true;
         }
         $this->assertEquals($threw, true);
@@ -266,7 +270,7 @@ final class LocoNotationGrammarTest extends TestCase
         $threw = false;
         try {
             $grammar1->parse("\x00"); # null
-        } catch (Ferno\Loco\ParseFailureException $e) {
+        } catch (ParseFailureException $e) {
             $threw = true;
         }
         $this->assertEquals($threw, true);
@@ -274,7 +278,7 @@ final class LocoNotationGrammarTest extends TestCase
         $threw = false;
         try {
             $grammar1->parse("\xED\xA0\x80"); # 55296d
-        } catch (Ferno\Loco\ParseFailureException $e) {
+        } catch (ParseFailureException $e) {
             $threw = true;
         }
         $this->assertEquals($threw, true);
@@ -282,7 +286,7 @@ final class LocoNotationGrammarTest extends TestCase
         $threw = false;
         try {
             $grammar1->parse("\xED\xBF\xBF"); # 57343d
-        } catch (Ferno\Loco\ParseFailureException $e) {
+        } catch (ParseFailureException $e) {
             $threw = true;
         }
         $this->assertEquals($threw, true);
@@ -290,9 +294,7 @@ final class LocoNotationGrammarTest extends TestCase
 
     public function testUtf8Long(): void
     {
-        global $locoGrammar;
-
-        $grammar1 = $locoGrammar->parse(" S ::= [^& <>\\]] ");
+        $grammar1 = self::$locoGrammar->parse(" S ::= [^& <>\\]] ");
         $this->assertEquals($grammar1->parse("A"), array("A"));
         $this->assertEquals($grammar1->parse("^"), array("^"));
         $this->assertEquals($grammar1->parse("\\"), array("\\"));
@@ -300,7 +302,7 @@ final class LocoNotationGrammarTest extends TestCase
         $threw = false;
         try {
             $grammar1->parse("&");
-        } catch (Ferno\Loco\ParseFailureException $e) {
+        } catch (ParseFailureException $e) {
             $threw = true;
         }
         $this->assertEquals($threw, true);
@@ -308,7 +310,7 @@ final class LocoNotationGrammarTest extends TestCase
         $threw = false;
         try {
             $grammar1->parse(" ");
-        } catch (Ferno\Loco\ParseFailureException $e) {
+        } catch (ParseFailureException $e) {
             $threw = true;
         }
         $this->assertEquals($threw, true);
@@ -316,7 +318,7 @@ final class LocoNotationGrammarTest extends TestCase
         $threw = false;
         try {
             $grammar1->parse("<");
-        } catch (Ferno\Loco\ParseFailureException $e) {
+        } catch (ParseFailureException $e) {
             $threw = true;
         }
         $this->assertEquals($threw, true);
@@ -324,7 +326,7 @@ final class LocoNotationGrammarTest extends TestCase
         $threw = false;
         try {
             $grammar1->parse(">");
-        } catch (Ferno\Loco\ParseFailureException $e) {
+        } catch (ParseFailureException $e) {
             $threw = true;
         }
         $this->assertEquals($threw, true);
@@ -332,7 +334,7 @@ final class LocoNotationGrammarTest extends TestCase
         $threw = false;
         try {
             $grammar1->parse("]");
-        } catch (Ferno\Loco\ParseFailureException $e) {
+        } catch (ParseFailureException $e) {
             $threw = true;
         }
         $this->assertEquals($threw, true);
@@ -340,8 +342,7 @@ final class LocoNotationGrammarTest extends TestCase
 
     public function testTwoRules(): void
     {
-        global $locoGrammar;
-        $grammar2 = $locoGrammar->parse("
+        $grammar2 = self::$locoGrammar->parse("
             unicode ::= 'a' '' b | 'grammar' '\\'' '\\\\' \"\\\"\"
             b::=
         ");
@@ -351,9 +352,7 @@ final class LocoNotationGrammarTest extends TestCase
 
     public function testBracketMatching(): void
     {
-        global $locoGrammar;
-
-        $bracketMatchGrammar = $locoGrammar->parse("
+        $bracketMatchGrammar = self::$locoGrammar->parse("
             S          ::= expression *
             expression ::= '<' S '>'
         ");
@@ -379,7 +378,7 @@ final class LocoNotationGrammarTest extends TestCase
             $threw = false;
             try {
                 $bracketMatchGrammar->parse($string);
-            } catch (Ferno\Loco\ParseFailureException $e) {
+            } catch (ParseFailureException $e) {
                 $threw = true;
             }
             $this->assertEquals($threw, true);
@@ -388,10 +387,8 @@ final class LocoNotationGrammarTest extends TestCase
 
     public function testFullJson(): void
     {
-        global $locoGrammar;
-
         // Full rules for recognising JSON
-        $jsonGrammar = $locoGrammar->parse("
+        $jsonGrammar = self::$locoGrammar->parse("
             topobject      ::= whitespace object
             object         ::= '{' whitespace objectcontent '}' whitespace
             objectcontent  ::= fullobject | ()
@@ -413,7 +410,9 @@ final class LocoNotationGrammarTest extends TestCase
             whitespace     ::= /[ \n\r\t]*/
         ");
 
-        $result = $jsonGrammar->parse(" { \"string\" : true, \"\\\"\" : false, \"\\u9874asdh\" : [ null, { }, -9488.44E+093 ] } ");
+        $result = $jsonGrammar->parse(
+            " { \"string\" : true, \"\\\"\" : false, \"\\u9874asdh\" : [ null, { }, -9488.44E+093 ] } "
+        );
 
         foreach (array(
             "{ \"string ",        // incomplete string
@@ -429,7 +428,7 @@ final class LocoNotationGrammarTest extends TestCase
             $threw = false;
             try {
                 $jsonGrammar->parse($string);
-            } catch (Exception $e) {
+            } catch (ParseFailureException $e) {
                 $threw = true;
             }
             $this->assertEquals($threw, true);
@@ -438,9 +437,7 @@ final class LocoNotationGrammarTest extends TestCase
 
     public function testQntmComments(): void
     {
-        global $locoGrammar;
-
-        $simpleCommentGrammar = $locoGrammar->parse("
+        $simpleCommentGrammar = self::$locoGrammar->parse("
             comment    ::= whitespace block*
             block      ::= h5 whitespace | p whitespace
             p          ::= '<p'      whitespace '>' text '</p'      whitespace '>'
@@ -471,7 +468,7 @@ final class LocoNotationGrammarTest extends TestCase
             $threw = false;
             try {
                 $simpleCommentGrammar->parse($string);
-            } catch (Ferno\Loco\ParseFailureException $e) {
+            } catch (ParseFailureException $e) {
                 $threw = true;
             }
             $this->assertEquals($threw, true);

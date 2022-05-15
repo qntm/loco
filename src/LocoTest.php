@@ -3,6 +3,7 @@ namespace Ferno\Loco;
 
 use PHPUnit\Framework\TestCase;
 use Ferno\Loco;
+use Exception;
 
 final class LocoTest extends TestCase
 {

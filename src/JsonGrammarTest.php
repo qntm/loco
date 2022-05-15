@@ -1,16 +1,25 @@
 <?php
-use PHPUnit\Framework\TestCase;
+namespace Ferno\Loco;
 
-require_once __DIR__ . '/JsonGrammar.php';
+use PHPUnit\Framework\TestCase;
+use Ferno\Loco\JsonGrammar;
 
 // apologies for the relative lack of exhaustive unit tests
 
 final class JsonGrammarTest extends TestCase
 {
+    private static $jsonGrammar;
+
+    public static function setUpBeforeClass(): void
+    {
+        self::$jsonGrammar = new JsonGrammar();
+    }
+
     public function testBasic(): void
     {
-        global $jsonGrammar;
-        $parseTree = $jsonGrammar->parse(" { \"string\" : true, \"\\\"\" : false, \"\\u9874asdh\" : [ null, { }, -9488.44E+093 ] } ");
+        $parseTree = self::$jsonGrammar->parse(
+            " { \"string\" : true, \"\\\"\" : false, \"\\u9874asdh\" : [ null, { }, -9488.44E+093 ] } "
+        );
 
         $this->assertEquals(count($parseTree), 3);
         $this->assertEquals($parseTree["string"], true);
@@ -20,7 +29,6 @@ final class JsonGrammarTest extends TestCase
 
     public function testFailureModes(): void
     {
-        global $jsonGrammar;
         foreach (array(
             "{ \"string ",        // incomplete string
             "{ \"\\UAAAA\" ",     // capital U on unicode char
@@ -41,8 +49,8 @@ final class JsonGrammarTest extends TestCase
         ) as $string) {
             $threw = false;
             try {
-                $jsonGrammar->parse($string);
-            } catch (Ferno\Loco\ParseFailureException $e) {
+                self::$jsonGrammar->parse($string);
+            } catch (ParseFailureException $e) {
                 $threw = true;
             }
             $this->assertEquals($threw, true);

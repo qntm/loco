@@ -1,32 +1,38 @@
 <?php
-use PHPUnit\Framework\TestCase;
-
-require_once __DIR__ . '/EbnfGrammar.php';
-
 // Takes a string presented in Extended Backus-Naur Form and turns it into a new Grammar
 // object capable of recognising the language described by that string.
 // http://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_Form
 
+namespace Ferno\Loco;
+
+use PHPUnit\Framework\TestCase;
+use Ferno\Loco\EbnfGrammar;
+
 final class EbnfGrammarTest extends TestCase
 {
+    private static $ebnfGrammar;
+
+    public static function setUpBeforeClass(): void
+    {
+        self::$ebnfGrammar = new EbnfGrammar();
+    }
+
     /**
      * @doesNotPerformAssertions
      */
     public function testBasic(): void
     {
-        global $ebnfGrammar;
         $string = "a = 'PROGRAM' ;";
-        $ebnfGrammar->parse($string)->parse("PROGRAM");
+        self::$ebnfGrammar->parse($string)->parse("PROGRAM");
     }
 
     public function testFailure(): void
     {
-        global $ebnfGrammar;
         $string = "a = 'PROGRAM ;";
         $threw = false;
         try {
-            $ebnfGrammar->parse($string);
-        } catch (Ferno\Loco\ParseFailureException $e) {
+            self::$ebnfGrammar->parse($string);
+        } catch (ParseFailureException $e) {
             $threw = true;
         }
         $this->assertEquals($threw, true);
@@ -37,7 +43,6 @@ final class EbnfGrammarTest extends TestCase
      */
     public function testFullRuleSet(): void
     {
-        global $ebnfGrammar;
         $string = "
             (* a simple program syntax in EBNF - Wikipedia *)
             program = 'PROGRAM' , white space , identifier , white space ,
@@ -56,7 +61,7 @@ final class EbnfGrammarTest extends TestCase
             white space = ( \" \" | \"\n\" ) , { \" \" | \"\n\" } ;
             all characters = \"H\" | \"e\" | \"l\" | \"o\" | \" \" | \"w\" | \"r\" | \"d\" | \"!\" ;
         ";
-        $pascalGrammar = $ebnfGrammar->parse($string);
+        $pascalGrammar = self::$ebnfGrammar->parse($string);
 
         $string =
              "PROGRAM DEMO1\n"

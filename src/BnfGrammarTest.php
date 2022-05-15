@@ -1,16 +1,23 @@
 <?php
-use PHPUnit\Framework\TestCase;
+namespace Ferno\Loco;
 
-require_once __DIR__ . '/BnfGrammar.php';
+use PHPUnit\Framework\TestCase;
+use Ferno\Loco\BnfGrammar;
 
 final class BnfGrammarTest extends TestCase
 {
+    private static $bnfGrammar;
+
+    public static function setUpBeforeClass(): void
+    {
+        self::$bnfGrammar = new BnfGrammar();
+    }
+
     /**
      * @doesNotPerformAssertions
      */
     public function testFullRuleSet(): void
     {
-        global $bnfGrammar;
         $string = "
             <postal-address> ::= <name-part> <street-address> <zip-part>
             <name-part>      ::= <personal-part> <name-part> | <personal-part> <last-name> <opt-jr-part> <EOL>
@@ -32,7 +39,7 @@ final class BnfGrammarTest extends TestCase
             <roman-numeral> ::= 'g'
         ";
 
-        $grammar2 = $bnfGrammar->parse($string);
+        $grammar2 = self::$bnfGrammar->parse($string);
 
         $grammar2->parse("Steve MacLaurin \n173 Acacia Avenue 7A\nStevenage, KY 33445\n");
     }
@@ -42,7 +49,6 @@ final class BnfGrammarTest extends TestCase
      */
     public function testSelfReference(): void
     {
-        global $bnfGrammar;
         $string = "
             <syntax>     ::= <rule> | <rule> <syntax>
             <rule>       ::= <opt-ws> \"<\" <rule-name> \">\" <opt-ws> \"::=\" <opt-ws> <expression> <line-end>
@@ -58,19 +64,18 @@ final class BnfGrammarTest extends TestCase
             <text>       ::= 'b'
         ";
 
-        $grammar3 = $bnfGrammar->parse($string);
+        $grammar3 = self::$bnfGrammar->parse($string);
 
         $grammar3->parse(" <a> ::= 'b' \n");
     }
 
     public function testFailure(): void
     {
-        global $bnfGrammar;
         $threw = false;
         $string = " <incomplete ::=";
         try {
-            $bnfGrammar->parse($string);
-        } catch (Ferno\Loco\ParseFailureException $e) {
+            self::$bnfGrammar->parse($string);
+        } catch (ParseFailureException $e) {
             $threw = true;
         }
         $this->assertEquals($threw, true);

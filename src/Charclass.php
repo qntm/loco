@@ -1,5 +1,8 @@
 <?php
 // A Charclass is a set of characters, possibly negated.
+
+namespace Ferno\Loco;
+
 class Charclass
 {
     public $chars = array();

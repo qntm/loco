@@ -2,15 +2,22 @@
 namespace Ferno\Loco;
 
 use PHPUnit\Framework\TestCase;
+use Ferno\Loco\WirthGrammar;
 
 final class WirthGrammarTest extends TestCase
 {
+    private static $wirthGrammar;
+
+    public static function setUpBeforeClass(): void
+    {
+        self::$wirthGrammar = new WirthGrammar();
+    }
+
     /**
      * @doesNotPerformAssertions
      */
     public function testWith(): void
     {
-        global $wirthGrammar;
         // This is the syntax for Wirth syntax notation except it lacks whitespace
         $string = "
             SYNTAX     = { PRODUCTION } .
@@ -34,6 +41,6 @@ final class WirthGrammarTest extends TestCase
             letter     = upper | lower .
             character  = letter | digit | \"=\" | \".\" | \"\"\"\"\"\" .
         ";
-        $wirthGrammar->parse($string)->parse("SYNTAX={PRODUCTION}.");
+        self::$wirthGrammar->parse($string)->parse("SYNTAX={PRODUCTION}.");
     }
 }

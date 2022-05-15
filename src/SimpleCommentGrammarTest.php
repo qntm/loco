@@ -1,15 +1,24 @@
 <?php
-use PHPUnit\Framework\TestCase;
+namespace Ferno\Loco;
 
-require_once __DIR__ . '/SimpleCommentGrammar.php';
+use PHPUnit\Framework\TestCase;
+use Ferno\Loco\SimpleCommentGrammar;
 
 final class SimpleCommentGrammarTest extends TestCase
 {
+    private static $simpleCommentGrammar;
+
+    public static function setUpBeforeClass(): void
+    {
+        self::$simpleCommentGrammar = new SimpleCommentGrammar();
+    }
+
     public function testSuccess(): void
     {
-        global $simpleCommentGrammar;
         $this->assertEquals(
-            $simpleCommentGrammar->parse("<h5>  Title<br /><em\n><strong\n></strong>&amp;</em></h5>   \r\n\t <p  >&lt;</p  >"),
+            self::$simpleCommentGrammar->parse(
+                "<h5>  Title<br /><em\n><strong\n></strong>&amp;</em></h5>   \r\n\t <p  >&lt;</p  >"
+            ),
             "<h5>  Title<br /><em\n><strong\n></strong>&amp;</em></h5>   \r\n\t <p  >&lt;</p  >"
         );
     }
@@ -26,8 +35,8 @@ final class SimpleCommentGrammarTest extends TestCase
         ) as $string) {
             $threw = false;
             try {
-                $simpleCommentGrammar->parse($string);
-            } catch (Exception $e) {
+                self::$simpleCommentGrammar->parse($string);
+            } catch (ParseFailureException $e) {
                 $threw = true;
             }
             $this->assertEquals($threw, true);
