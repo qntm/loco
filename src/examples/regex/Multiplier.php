@@ -3,7 +3,7 @@
 // integer upper bound greater than or equal to the lower bound.
 // The upper bound can also be null (infinity)
 
-namespace Ferno\Loco;
+namespace Ferno\Loco\examples\regex;
 
 class Multiplier
 {

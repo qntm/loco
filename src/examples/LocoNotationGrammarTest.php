@@ -1,8 +1,8 @@
 <?php
-namespace Ferno\Loco;
+namespace Ferno\Loco\examples;
 
 use PHPUnit\Framework\TestCase;
-use Ferno\Loco\LocoNotationGrammar;
+use Ferno\Loco\ParseFailureException;
 
 final class LocoNotationGrammarTest extends TestCase
 {

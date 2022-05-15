@@ -1,8 +1,8 @@
 <?php
-namespace Ferno\Loco;
+namespace Ferno\Loco\examples;
 
 use PHPUnit\Framework\TestCase;
-use Ferno\Loco\BnfGrammar;
+use Ferno\Loco\ParseFailureException;
 
 final class BnfGrammarTest extends TestCase
 {

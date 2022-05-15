@@ -1,8 +1,7 @@
 <?php
-namespace Ferno\Loco;
+namespace Ferno\Loco\examples\regex;
 
 use PHPUnit\Framework\TestCase;
-use Ferno\Loco\RegExGrammar;
 
 // apologies for the relative lack of exhaustive unit tests
 

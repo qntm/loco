@@ -3,9 +3,16 @@
 // object capable of recognising the language described by that string.
 // http://en.wikipedia.org/wiki/Backus%E2%80%93Naur_Form
 
-namespace Ferno\Loco;
+namespace Ferno\Loco\examples;
 
+use Ferno\Loco\Grammar;
 use Ferno\Loco\ConcParser;
+use Ferno\Loco\GreedyMultiParser;
+use Ferno\Loco\LazyAltParser;
+use Ferno\Loco\StringParser;
+use Ferno\Loco\GreedyStarParser;
+use Ferno\Loco\RegexParser;
+use Ferno\Loco\EmptyParser;
 
 final class BnfGrammar extends Grammar
 {

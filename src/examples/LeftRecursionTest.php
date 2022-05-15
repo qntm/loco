@@ -5,9 +5,16 @@
 # Loco detects left-recursion in a new grammar and raises an exception.
 # How do we get around this?
 
-namespace Ferno\Loco;
+namespace Ferno\Loco\examples;
 
 use PHPUnit\Framework\TestCase;
+use Ferno\Loco\RegexParser;
+use Ferno\Loco\ConcParser;
+use Ferno\Loco\StringParser;
+use Ferno\Loco\Grammar;
+use Ferno\Loco\LazyAltParser;
+use Ferno\Loco\GrammarException;
+use Ferno\Loco\GreedyStarParser;
 
 final class LeftRecursionTest extends TestCase
 {

@@ -1,8 +1,8 @@
 <?php
-namespace Ferno\Loco;
+namespace Ferno\Loco\examples;
 
 use PHPUnit\Framework\TestCase;
-use Ferno\Loco\JsonGrammar;
+use Ferno\Loco\ParseFailureException;
 
 // apologies for the relative lack of exhaustive unit tests
 

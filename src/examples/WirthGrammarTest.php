@@ -1,8 +1,7 @@
 <?php
-namespace Ferno\Loco;
+namespace Ferno\Loco\examples;
 
 use PHPUnit\Framework\TestCase;
-use Ferno\Loco\WirthGrammar;
 
 final class WirthGrammarTest extends TestCase
 {

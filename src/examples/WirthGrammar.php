@@ -3,7 +3,15 @@
 // Grammar object capable of recognising the language described by that string.
 // http://en.wikipedia.org/wiki/Wirth_syntax_notation
 
-namespace Ferno\Loco;
+namespace Ferno\Loco\examples;
+
+use Ferno\Loco\Grammar;
+use Ferno\Loco\GreedyStarParser;
+use Ferno\Loco\ConcParser;
+use Ferno\Loco\StringParser;
+use Ferno\Loco\GreedyMultiParser;
+use Ferno\Loco\LazyAltParser;
+use Ferno\Loco\RegexParser;
 
 final class WirthGrammar extends Grammar
 {

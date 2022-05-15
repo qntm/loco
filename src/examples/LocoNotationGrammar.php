@@ -2,7 +2,17 @@
 // Takes a string presented in Loco Backus-Naur Form and turns it into a
 // new Grammar object capable of recognising the language described by that string.
 
-namespace Ferno\Loco;
+namespace Ferno\Loco\examples;
+
+use Ferno\Loco\Grammar;
+use Ferno\Loco\ConcParser;
+use Ferno\Loco\GreedyStarParser;
+use Ferno\Loco\LazyAltParser;
+use Ferno\Loco\RegexParser;
+use Ferno\Loco\StringParser;
+use Ferno\Loco\EmptyParser;
+use Ferno\Loco\Utf8Parser;
+use Ferno\Loco\GreedyMultiParser;
 
 final class LocoNotationGrammar extends Grammar
 {

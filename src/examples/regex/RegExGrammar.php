@@ -1,5 +1,13 @@
 <?php
-namespace Ferno\Loco;
+namespace Ferno\Loco\examples\regex;
+
+use Ferno\Loco\Grammar;
+use Ferno\Loco\ConcParser;
+use Ferno\Loco\GreedyStarParser;
+use Ferno\Loco\StringParser;
+use Ferno\Loco\LazyAltParser;
+use Ferno\Loco\EmptyParser;
+use Ferno\Loco\RegexParser;
 
 final class RegExGrammar extends Grammar
 {

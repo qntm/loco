@@ -1,5 +1,14 @@
 <?php
-namespace Ferno\Loco;
+namespace Ferno\Loco\examples;
+
+use Ferno\Loco\Grammar;
+use Ferno\Loco\ConcParser;
+use Ferno\Loco\LazyAltParser;
+use Ferno\Loco\EmptyParser;
+use Ferno\Loco\GreedyStarParser;
+use Ferno\Loco\RegexParser;
+use Ferno\Loco\StringParser;
+use Ferno\Loco\Utf8Parser;
 
 final class JsonGrammar extends Grammar
 {

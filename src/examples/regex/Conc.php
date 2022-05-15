@@ -1,7 +1,7 @@
 <?php
 // Each Conc is a concatenation of several "Mults"
 
-namespace Ferno\Loco;
+namespace Ferno\Loco\examples\regex;
 
 class Conc
 {

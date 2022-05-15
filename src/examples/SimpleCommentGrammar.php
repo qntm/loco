@@ -1,5 +1,13 @@
 <?php
-namespace Ferno\Loco;
+namespace Ferno\Loco\examples;
+
+use Ferno\Loco\Grammar;
+use Ferno\Loco\GreedyStarParser;
+use Ferno\Loco\LazyAltParser;
+use Ferno\Loco\ConcParser;
+use Ferno\Loco\RegexParser;
+use Ferno\Loco\Utf8Parser;
+use Ferno\Loco\StringParser;
 
 final class SimpleCommentGrammar extends Grammar
 {

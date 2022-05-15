@@ -6,7 +6,15 @@
 // Can't handle exceptions, since these are not context-free
 // Can't handle specials, which have no clear definition
 
-namespace Ferno\Loco;
+namespace Ferno\Loco\examples;
+
+use Ferno\Loco\Grammar;
+use Ferno\Loco\ConcParser;
+use Ferno\Loco\GreedyStarParser;
+use Ferno\Loco\StringParser;
+use Ferno\Loco\LazyAltParser;
+use Ferno\Loco\RegexParser;
+use Ferno\Loco\GreedyMultiParser;
 
 final class EbnfGrammar extends Grammar
 {

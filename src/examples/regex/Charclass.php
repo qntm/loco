@@ -1,7 +1,7 @@
 <?php
 // A Charclass is a set of characters, possibly negated.
 
-namespace Ferno\Loco;
+namespace Ferno\Loco\examples\regex;
 
 class Charclass
 {

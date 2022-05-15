@@ -18,10 +18,7 @@
     "autoload": {
         "psr-4": {
             "Ferno\\Loco\\": "./src"
-        },
-        "files": [
-            "src/Loco.php"
-        ]
+        }
     },
     "license": "MIT",
     "scripts": {

@@ -3,10 +3,10 @@
 // object capable of recognising the language described by that string.
 // http://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_Form
 
-namespace Ferno\Loco;
+namespace Ferno\Loco\examples;
 
 use PHPUnit\Framework\TestCase;
-use Ferno\Loco\EbnfGrammar;
+use Ferno\Loco\ParseFailureException;
 
 final class EbnfGrammarTest extends TestCase
 {
